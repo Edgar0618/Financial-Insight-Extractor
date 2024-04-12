@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instructions</title>
+</head>
+<body>
+    <header>
+        <h1>Instructions</h1>
+    </header>
+    <section>
+        <p>
+            Please upload a PDF file below (need to elaborate instructions later).
+        </p>
+        <form action="/upload_pdf" method="post" enctype="multipart/form-data">
+            <label for="pdf_file">Upload PDF:</label><br>
+            <input type="file" id="pdf_file" name="pdf_file" accept=".pdf" required><br>
+            <input type="submit" value="Upload">
+        </form>
+    </section>
+</body>
+</html>

@@ -34,11 +34,26 @@ def login_page():
             hashed_password = hash_password(password)
             success, user = login(conn, username, hashed_password)
             if success:
-                # Redirect to a profile page or dashboard after successful login
-                return redirect(url_for('index'))
+                # Redirect to instructions after successful login
+                return redirect(url_for('instructions'))
             else:
                 error = "Invalid username or password"
     return render_template('login.html', error=error)
+
+@app.route('/instructions')
+def instructions():
+    return render_template('instructions.html')
+
+@app.route('/upload_pdf', methods=['POST'])
+def upload_pdf():
+    if'pdf_file' not in request.files:
+        return "No file part"
+
+    pdf_file = request.files['pdf_file']
+    if pdf_file.filename == '':
+        return "No selected file"
+
+    return "File uploaded"
 
 if __name__ == '__main__':
     app.run(debug=True)
