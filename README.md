@@ -18,3 +18,5 @@ Once you run mongosh, run: use("userDatabase")
 This is our projects database
 You can run a command such as: db.users.find({}, { password: 0, _id: 0 }) 
 (shows you registered users)
+
+I created a git ignore file so you guys do not need to delete venv every time you push.
