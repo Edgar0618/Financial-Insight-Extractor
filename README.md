@@ -1,16 +1,16 @@
 # COP4521-Project
 
 Instructions to run:
-1) On your terminal, run the commands:
+1- On your terminal, run the commands:
 brew tap mongodb/brew
 brew install mongodb-community
 brew services start mongodb/brew/mongodb-community
 
-2) On the project root directory:
+2- On the project root directory:
 Install flask: pip install flask
 Install pymongo: pip3 install pymongo 
 
-3) Optional:
+3- Optional:
 Install mongosh: brew install mongosh 
 To run: mongosh
 This lets you see important info about database such as the users registered.
