@@ -5,7 +5,7 @@
 ## Initial Setup
 
 1. **Install MongoDB:**
-   Open your terminal and run the following commands to install MongoDB on macOS:
+   Open your terminal and run these commands to install MongoDB on macOS:
    ```bash
    brew tap mongodb/brew
    brew install mongodb-community
@@ -15,7 +15,7 @@
 ## Configuration Steps
 
 2. **Setup Python Environment:**
-   In the project root directory, install the necessary Python packages:
+   In the project root directory create a venv and install the necessary Python packages:
 
    - Install Flask:
      ```bash
@@ -38,15 +38,15 @@
      ```bash
      mongosh
      ```
-   - Once `mongosh` is running, connect to your project's database:
+   - Once `mongosh` is running, connect to our database:
      ```bash
      use("userDatabase")
      ```
-   - To view registered users without displaying their passwords or IDs, run:
+   - Example usage to view registered users:
      ```bash
      db.users.find({}, { password: 0, _id: 0 })
      ```
 
 ## Note
 
-- A `.gitignore` file has been created to ensure that `venv` and other non-essential files are not tracked by Git. You do not need to delete `venv` every time you push changes to the repository.
+- A `.gitignore` file has been created to ensure that `venv` and other  files are not tracked by our git pushes.
