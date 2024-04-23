@@ -27,6 +27,11 @@
      pip3 install pymongo
      ```
 
+   - Install yFinance:
+     ```bash
+     pip3 install yfinance
+     ```
+
 ## Optional Tools
 
 3. **Install and Use MongoDB Shell (mongosh):**
