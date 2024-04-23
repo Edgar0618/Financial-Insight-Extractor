@@ -10,7 +10,7 @@
             padding: 0;
             background-color: #f4f4f4;
         }
-        
+
         header {
             background: #333;
             color: white;
@@ -36,6 +36,48 @@
         header ul li a:hover {
             background: lightgray;
         }
+
+        main {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80vh; /* Optional: Adjusts the vertical space to center the form more */
+        }
+
+        section {
+            margin: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 300px; /* Ensures that the form does not stretch too wide */
+        }
+
+        label, input {
+            display: block;
+            margin: 10px 0;
+        }
+
+        input[type="text"], input[type="password"], input[type="date"] {
+            width: calc(100% - 20px);
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background: #555;
+        }
     </style>
 </head>
 <body>
@@ -50,14 +92,14 @@
         <section>
             <h2>Create an Account</h2>
             <form action="/register" method="post">
-                <label for="username">Username:</label><br>
-                <input type="text" id="username" name="username" required><br>
-                <label for="password">Password:</label><br>
-                <input type="password" id="password" name="password" required><br>
-                <label for="name">Name:</label><br>
-                <input type="text" id="name" name="name" required><br>
-                <label for="date_of_birth">Date of Birth:</label><br>
-                <input type="date" id="date_of_birth" name="date_of_birth" required><br>
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+                <label for="date_of_birth">Date of Birth:</label>
+                <input type="date" id="date_of_birth" name="date_of_birth" required>
                 <input type="submit" value="Register">
             </form>
         </section>

@@ -10,7 +10,7 @@
             padding: 0;
             background-color: #f4f4f4;
         }
-        
+
         header {
             background: #333;
             color: white;
@@ -36,25 +36,67 @@
         header ul li a:hover {
             background: lightgray;
         }
+
+        form {
+            margin: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 300px;
+            display: block;
+            margin: 50px auto;
+        }
+
+        label, input {
+            display: block;
+            margin: 10px 0;
+            width: calc(100% - 20px);
+        }
+
+        input[type="text"], input[type="password"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background: #555;
+        }
+
+        p {
+            text-align: center;
+            color: red;
+        }
     </style>
 </head>
 <body>
-    <Header>
+    <header>
         <h1>Login</h1>
         <ul>
             <li><a href="/">Home</a></li>
             <li><a href="/register">Register</a></li>
         </ul>
-    </Header>
+    </header>
     <form action="/login" method="post">
-        <label for="username">Username:</label><br>
-        <input type="text" id="username" name="username"><br>
-        <label for="password">Password:</label><br>
-        <input type="password" id="password" name="password"><br><br>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
         <input type="submit" value="Login">
     </form>
     {% if error %}
-        <p style="color: red;">{{ error }}</p>
+        <p>{{ error }}</p>
     {% endif %}
 </body>
 </html>
