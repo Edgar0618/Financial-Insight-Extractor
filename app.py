@@ -93,8 +93,8 @@ def upload_pdf():
 
 @app.route('/compare', methods=['GET', 'POST'])
 def compare():
-    msft = yf.Ticker("MSFT")
-    print(msft.info)
+    #msft = yf.Ticker("MSFT")
+    #print(msft.info)
     sector = request.form.get('sectors')
     option = request.form.get('options')
     results=[]
