@@ -93,23 +93,24 @@ def upload_pdf():
 
 @app.route('/compare', methods=['GET', 'POST'])
 def compare():
-    #msft = yf.Ticker("MSFT")
-    #print(msft.info)
+    msft = yf.Ticker("MSFT")
+    print(msft.info)
     sector = request.form.get('sectors')
     option = request.form.get('options')
     results=[]
-
+    average=[]
     if sector in sector_companies:
         for symbol in sector_companies[sector]:
                 ticker = yf.Ticker(symbol)
                 try: 
                     if option == 'net_income':
                         income_statement = ticker.financials
-                        result = income_statement.loc['Net Income'][0]
+                        result = income_statement.loc['Net Income'].iloc[0]
+                        #value = [symbol] + ": " + ticker + ":" + income_statement.loc['Net Income'][0]
     
                     elif option == 'revenue':
                         revenue_statement = ticker.financials
-                        result = revenue_statement.loc['Total Revenue'][0]
+                        result = revenue_statement.loc['Total Revenue'].iloc[0]
 
                     elif option == 'earnings_per_share':
                         info = ticker.info
@@ -120,15 +121,23 @@ def compare():
                     else:
                         continue
 
-                    results.append(result)
+                    #list.append(value)
+                    results.append((symbol, result))
+                    average.append(result)
                 except Exception as e:
                     print("Error getting datra for symbl {symbol}: {e}")
         
+        results.sort(key=lambda x: x[1], reverse=True)
+
+        display = ", ".join([f"{symbol}: {value:,.2f}" for symbol, value in results])
+        #result_txt = f""
+
         if results:
-            avg_result = sum(results) / len(results)
-            result_txt = f"Avg: {option} for {sector}: ${avg_result:,.2f}"
+            avg_result = sum(average) / len(average)
+            result_txt = f"Vals for {option} in {sector}: {display} \n Avg: {option} for {sector}: ${avg_result:,.2f}"
         else:
             result_txt = "Wont work spongebob"
+
 
         return render_template('compare.html', result = result_txt)
 
