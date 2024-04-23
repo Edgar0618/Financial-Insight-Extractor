@@ -1,5 +1,5 @@
 from flask import Flask, render_template_string
-import fitz
+import fitz  # PyMuPDF
 import re
 
 app = Flask(__name__)
@@ -119,11 +119,13 @@ def report():
     <table>
         <tr>
             <th style="background-color: #337ab7;">Financial Metric</th>
-            <th style="background-color: #337ab7;">Value (in million USD)</th>
+            <th style="background-color: #337ab7;">2022 (in million USD)</th>
+            <th style="background-color: #337ab7;">2023 (in million USD)</th>
         </tr>
-        <!-- Rows with balance sheet data will be dynamically inserted here -->
+        <!-- Rows with balance sheet data for 2022 and 2023 will be dynamically inserted here -->
     </table>
 </div>
+
 
    <!-- Consolidated Statements of Operations table -->
 <div class="report-container">
@@ -131,7 +133,8 @@ def report():
     <table>
         <tr>
             <th style="background-color: #ff0000;">Financial Metric</th>
-            <th style="background-color: #ff0000;">Value (in million USD)</th>
+            <th style="background-color: #ff0000;">2022 (in million USD)</th>
+            <th style="background-color: #ff0000;">2023 (in million USD)</th>
         </tr>
         <!-- Rows with statements of operations data will be dynamically inserted here -->
     </table>
@@ -143,7 +146,8 @@ def report():
     <table>
         <tr>
             <th style="background-color: #f0ad4e;">Financial Metric</th>
-            <th style="background-color: #f0ad4e;">Value (in million USD)</th>
+            <th style="background-color: #f0ad4e;">2022 (in million USD)</th>
+            <th style="background-color: #f0ad4e;">2023 (in million USD)</th>
         </tr>
         <!-- Rows with cash flows data will be dynamically inserted here -->
     </table>
