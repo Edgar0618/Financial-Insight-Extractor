@@ -49,9 +49,9 @@ def report():
 
     html_template = """
     <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
@@ -85,18 +85,23 @@ def report():
         tr:nth-child(even) {
             background-color: #f2f2f2;
         }
+        h1 {
+            text-align: center;
+        }
     </style>
     <title>Quarterly Earnings Report</title>
 </head>
 <body>
+    <h1>Quarterly Earnings Report</h1>
     <div class="report-container">
-        <h1>Quarterly Earnings Report</h1>
+
+        <!-- THIS WILL BE REPLACED WITH A PARAGRAPH-->    
+        <h2>Overview: Results of Operations</h2>
         <table>
             <tr>
                 <th>Financial Metric</th>
                 <th>Value (in million USD)</th>
             </tr>
-            <!-- The initial financial metrics table as before -->
             <tr>
                 <td>Net Sales</td>
                 <td>{{ net_sales }}</td>
@@ -122,7 +127,17 @@ def report():
             <th style="background-color: #337ab7;">2022 (in million USD)</th>
             <th style="background-color: #337ab7;">2023 (in million USD)</th>
         </tr>
-        <!-- Rows with balance sheet data for 2022 and 2023 will be dynamically inserted here -->
+        <tr>
+            <td>Total Current Assests</td>
+            <td>{{ cash_beginning_2022 }}</td>
+            <td>{{ cash_beginning_2023 }}</td>
+        </tr>
+        <tr>
+            <td>Total Assets</td>
+            <td>{{ cash_beginning_2022 }}</td>
+            <td>{{ cash_beginning_2023 }}</td>
+        </tr>
+        <tr>
     </table>
 </div>
 
@@ -136,7 +151,39 @@ def report():
             <th style="background-color: #ff0000;">2022 (in million USD)</th>
             <th style="background-color: #ff0000;">2023 (in million USD)</th>
         </tr>
-        <!-- Rows with statements of operations data will be dynamically inserted here -->
+        <tr>
+            <td>CASH, CASH EQUIVALENTS, AND RESTRICTED CASH, BEGINNING OF PERIOD</td>
+            <td>{{ cash_beginning_2022 }}</td>
+            <td>{{ cash_beginning_2023 }}</td>
+        </tr>
+        <tr>
+            <td>Net income (loss)</td>
+            <td>{{ net_income_2022 }}</td>
+            <td>{{ net_income_2023 }}</td>
+        </tr>
+        <tr>
+            <td>Net cash provided by (used in) operating activities</td>
+            <td>{{ net_operating_cash_2022 }}</td>
+            <td>{{ net_operating_cash_2023 }}</td>
+        </tr>
+        <tr>
+            <td>Net cash used in investing activities</td>
+            <td>{{ net_investing_cash_2022 }}</td>
+            <td>{{ net_investing_cash_2023 }}</td>
+        </tr>
+        <tr>
+            <td>Net cash provided by (used in) financing activities</td>
+            <td>{{ net_financing_cash_2022 }}</td>
+            <td>{{ net_financing_cash_2023 }}</td>
+        </tr>
+        <tr>
+            <td>CASH, CASH EQUIVALENTS, AND RESTRICTED CASH, END OF PERIOD</td>
+            <td>{{ cash_beginning_2022 }}</td>
+            <td>{{ cash_beginning_2023 }}</td>
+        </tr>
+    <table>
+</div>
+
     </table>
 </div>
 
@@ -149,10 +196,33 @@ def report():
             <th style="background-color: #f0ad4e;">2022 (in million USD)</th>
             <th style="background-color: #f0ad4e;">2023 (in million USD)</th>
         </tr>
-        <!-- Rows with cash flows data will be dynamically inserted here -->
-    </table>
+        <tr>
+            <td>Total Net Sales</td>
+            <td>{{ total_net_sales_2022 }}</td>
+            <td>{{ total_net_sales_2023 }}</td>
+        </tr>
+        <tr>
+            <td>Total Operating Expenses</td>
+            <td>{{ total_operating_expenses_2022 }}</td>
+            <td>{{ total_operating_expenses_2023 }}</td>
+        </tr>
+        <tr>
+            <td>Net income (loss)</td>
+            <td>{{ net_operating_cash_2022 }}</td>
+            <td>{{ net_operating_cash_2023 }}</td>
+        </tr>
+        <tr>
+            <td>Basic Earnings Per Share</td>
+            <td>{{ basic_earnings_per_share_2022 }}</td>
+            <td>{{ basic_earnings_per_share_2023 }}</td>
+        </tr>
+        <tr>
+            <td>Diluted Earnings Per Share</td>
+            <td>{{ diluted_earnings_per_share_2022 }}</td>
+            <td>{{ diluted_earnings_per_share_2023 }}</td>
+        </tr>
+    <table>
 </div>
-
 
     <!-- Existing Risk Factors section -->
     <div class="report-container">
