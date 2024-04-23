@@ -49,7 +49,7 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login_page():
     if 'username' in session:
-        return redirect(url_for('instructions'))
+        return redirect(url_for('index'))
     error = None
     if request.method == 'POST':
         db = createConnection()
@@ -59,7 +59,7 @@ def login_page():
         success, user = login(db, username, hashed_password)
         if success:
             session['username'] = username
-            return redirect(url_for('instructions'))
+            return redirect(url_for('index'))
         else:
             error = "Invalid username or password"
     
