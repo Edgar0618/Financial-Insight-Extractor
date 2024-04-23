@@ -1,4 +1,5 @@
 from flask import Flask, render_template_string
+import yfinance as yf
 import fitz  # PyMuPDF
 import re
 
@@ -11,22 +12,6 @@ def extract_text_from_pdf(pdf_path):
         for page in pdf:
             text += page.get_text()
     return text
-
-def extract_risk_factors(text, start_pattern, end_pattern):
-    # Find the first occurrence of the start pattern
-    first_occurrence_index = text.find(start_pattern)
-    
-    # Find the second occurrence of the start pattern
-    start_index = text.find(start_pattern, first_occurrence_index + len(start_pattern))
-    end_index = text.find(end_pattern, start_index)
-    
-    if start_index != -1 and end_index != -1:
-        return text[start_index:end_index].strip()
-    elif start_index != -1:
-        return text[start_index:start_index + 1500].strip()
-    else:
-        return "Risk Factors section not found."
-
 
 # Function to parse relevant data from text
 def parse_financial_data(text):
@@ -46,6 +31,42 @@ def report():
     pdf_path = 'AmazonEarnings.pdf'
     text = extract_text_from_pdf(pdf_path)
     data = parse_financial_data(text)
+
+    tickerSymbol = 'MSFT'  # Example for Microsoft Corporation
+    tickerData = yf.Ticker(tickerSymbol)
+    ticker_info = tickerData.info
+
+    # Fetch live market data for the indices and commodities
+    market_tickers = {
+        'S&P 500': '^GSPC',
+        'Dow 30': '^DJI',
+        'Nasdaq': '^IXIC',
+        'Russell 2000': '^RUT',
+        'Crude Oil': 'CL=F',
+        'Gold': 'GC=F'
+    }
+
+    live_market_data = {}
+    for name, ticker in market_tickers.items():
+        individual_ticker_info = yf.Ticker(ticker).info  # Get the info for each market ticker
+        # Fallback to 'previousClose' if 'regularMarketPrice' is not available, then to 'N/A'
+        live_market_data[name] = individual_ticker_info.get('regularMarketPrice') or individual_ticker_info.get('previousClose', 'N/A')
+
+
+    other_ticker_data = {
+        'ticker': tickerSymbol,
+        'current_price': ticker_info['currentPrice'],
+        'pe_ratio': ticker_info.get('trailingPE', 'N/A'),
+        'week_change': ticker_info.get('52WeekChange', 'N/A'),
+        'earnings_growth': ticker_info.get('earningsGrowth', 'N/A'),
+    }
+
+    # Prepare the final data to pass to the template
+    final_data = {
+        'data': data,  # Financial data from the PDF
+        'ticker_info': other_ticker_data,  # Information about Microsoft stock
+        'live_market_data': live_market_data,  # Live market data for indices and commodities
+    }
 
     html_template = """
     <!DOCTYPE html>
@@ -92,30 +113,23 @@ def report():
     <title>Quarterly Earnings Report</title>
 </head>
 <body>
+     <!-- Live Market Data Bar section -->
+        <div class="market-data-container">
+            <h2>Live Market Data</h2>
+            <div style="background-color: #f4f4f4; padding: 10px; margin-bottom: 20px;">
+                {% for name, value in live_market_data.items() %}
+                <span><strong>{{ name }}</strong>: {{ value }}</span> |
+                {% endfor %}
+            </div>
+        </div>
+        
     <h1>Quarterly Earnings Report</h1>
-    <div class="report-container">
-
-        <!-- THIS WILL BE REPLACED WITH A PARAGRAPH-->    
-        <h2>Overview: Results of Operations</h2>
-        <table>
-            <tr>
-                <th>Financial Metric</th>
-                <th>Value (in million USD)</th>
-            </tr>
-            <tr>
-                <td>Net Sales</td>
-                <td>{{ net_sales }}</td>
-            </tr>
-            <tr>
-                <td>Operating Income</td>
-                <td>{{ operating_income }}</td>
-            </tr>
-            <tr>
-                <td>Net Income</td>
-                <td>{{ net_income }}</td>
-            </tr>
-            <!-- Add more rows for other data points -->
-        </table>
+    <div class="report-container">   
+        <h2>{{ ticker_info.ticker }} Stock Information</h2>
+        <p>Current Price: {{ ticker_info.current_price }}</p>
+        <p>P/E Ratio: {{ ticker_info.pe_ratio }}</p>
+        <p>52-Week Change: {{ ticker_info.week_change }}</p>
+        <p>Earnings Growth: {{ ticker_info.earnings_growth }}</p>
     </div>
 
     <!-- Consolidated Balance Sheets table -->
@@ -128,23 +142,36 @@ def report():
             <th style="background-color: #337ab7;">2023 (in million USD)</th>
         </tr>
         <tr>
-            <td>Total Current Assests</td>
-            <td>{{ cash_beginning_2022 }}</td>
-            <td>{{ cash_beginning_2023 }}</td>
+            <td>Total Current Assets</td>
+            <td>{{ current_assets_2022 }}</td>
+            <td>{{ current_assets_2023 }}</td>
         </tr>
         <tr>
             <td>Total Assets</td>
-            <td>{{ cash_beginning_2022 }}</td>
-            <td>{{ cash_beginning_2023 }}</td>
+            <td>{{ total_assets_2022 }}</td>
+            <td>{{ total_assets_2023 }}</td>
         </tr>
         <tr>
+            <td>Total Current Liabilities</td>
+            <td>{{ total_current_liabilities_2022 }}</td>
+            <td>{{ total_current_liabilities_2023 }}</td>
+        </tr>
+        <tr>
+            <td>Total Stockholders' Equity</td>
+            <td>{{ total_current_liabilities_2022 }}</td>
+            <td>{{ total_current_liabilities_2023 }}</td>
+        </tr>
+        <tr>
+            <td>Total Liabilities and Stockholders' Equity</td>
+            <td>{{ total_liabilities_and_stockholders_equity_2022 }}</td>
+            <td>{{ total_liabilities_and_stockholders_equity_2023 }}</td>
+        </tr>
     </table>
 </div>
 
-
    <!-- Consolidated Statements of Operations table -->
 <div class="report-container">
-    <h2>Consolidated Statements of Operations</h2>
+    <h2>Consolidated Statements of Operations </h2>
     <table>
         <tr>
             <th style="background-color: #ff0000;">Financial Metric</th>
@@ -232,8 +259,7 @@ def report():
 </body>
 </html>
 """
-
-    return render_template_string(html_template, **data)
+    return render_template_string(html_template, **final_data)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port = 5001)
