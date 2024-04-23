@@ -118,6 +118,10 @@ def compare():
                             result = info['revenuePerShare']
                         else:
                             print("No revenue per share data for", symbol)
+
+                    elif option == 'operating_income':
+                        income_statement = ticker.financials
+                        result = income_statement.loc['Operating Income'].iloc[0]
                     else:
                         continue
 
