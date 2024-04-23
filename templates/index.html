@@ -40,10 +40,16 @@
 </head>
 <body>
     <header>
-        <h1>Welcome To DataMiner</h1>
+        <h1>Welcome To DataMiner, {{name}}</h1>
         <ul>
+            {% if is_logged_in %}
+            <li><a href="/instructions">upload a PDF</a></li>
+            <li><a href="/logout">Log out</a></li>
+            <li><a href="/compare">Compare</a></li>
+            {% else %}
             <li><a href="/login">Login</a></li>
             <li><a href="/register">Register</a></li>
+            {% endif %}
         </ul>
     </header>
     <section>
