@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, render_template_string
 from Database import createConnection, createCollection, registerUser, login
 from PasswordHashing import hash_password, verify_password
 import yfinance as yf
@@ -7,6 +7,8 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import io
 import base64
+import fitz  # PyMuPDF
+import re
 
 
 app = Flask(__name__)
@@ -95,17 +97,68 @@ def instructions():
         return render_template('instructions.html', name=user['name'])
     return render_template('instructions.html')
 
+def extract_text_from_pdf(pdf_stream):
+    with fitz.open(stream=pdf_stream.read(), filetype="pdf") as pdf:
+        text = ""
+        for page in pdf:
+            text += page.get_text()
+    return text
+
+# Function to parse relevant data from text
+def parse_financial_data(text):
+    patterns = {
+        'net_sales': r'Net sales .+\$(\d+\.\d+) billion',
+        'operating_income': r'Operating income .+\$(\d+\.\d+) billion',
+        'net_income': r'Net income .+\$(\d+\.\d+) billion',
+    }
+    data = {}
+    for key, pattern in patterns.items():
+        match = re.search(pattern, text)
+        data[key] = match.group(1) if match else "Not found"
+    return data
 
 @app.route('/upload_pdf', methods=['POST'])
 def upload_pdf():
     if 'username' not in session:
         return redirect(url_for('login'))
     if 'pdf_file' not in request.files:
-        return "No file part"
+        return "No file part", 400
     pdf_file = request.files['pdf_file']
-    if pdf_file.filename == '':
-        return "No selected file"
-    return "File uploaded"
+    if pdf_file and allowed_file(pdf_file.filename):
+        text = extract_text_from_pdf(pdf_file.stream)
+        data = parse_financial_data(text)
+
+        market_tickers = {
+            'S&P 500': '^GSPC',
+            'Dow 30': '^DJI',
+            'Nasdaq': '^IXIC',
+            'Russell 2000': '^RUT',
+            'Crude Oil': 'CL=F',
+            'Gold': 'GC=F'
+        }
+
+        live_market_data = {}
+        for name, ticker in market_tickers.items():
+            individual_ticker_info = yf.Ticker(ticker).info
+            live_market_data[name] = individual_ticker_info.get('regularMarketPrice') or individual_ticker_info.get('previousClose', 'N/A')
+
+        tickerSymbol = 'MSFT'
+        ticker_info = yf.Ticker(tickerSymbol).info
+
+        other_ticker_data = {
+            'ticker': tickerSymbol,
+            'current_price': ticker_info.get('currentPrice', 'N/A'),
+            'pe_ratio': ticker_info.get('trailingPE', 'N/A'),
+            'week_change': ticker_info.get('52WeekChange', 'N/A'),
+            'earnings_growth': ticker_info.get('earningsGrowth', 'N/A'),
+        }
+
+        return render_template('scanResults.html', data=data, live_market_data=live_market_data, ticker_info=other_ticker_data)
+    else:
+        return "Invalid file or no file selected", 400
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() == 'pdf'
 
 @app.route('/compare', methods=['GET', 'POST'])
 def compare():
