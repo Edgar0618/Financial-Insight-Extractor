@@ -250,12 +250,6 @@ def report():
         </tr>
     <table>
 </div>
-
-    <!-- Existing Risk Factors section -->
-    <div class="report-container">
-        <h2>Risk Factors</h2>
-        <p>{{ risk_factors }}</p>
-    </div>
 </body>
 </html>
 """
