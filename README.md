@@ -35,6 +35,10 @@
      ```bash
      pip3 install matplotlib
      ```
+   - Install PyMuPDF:
+     ```bash
+     pip install pymupdf
+     ```
 
 ## Optional Tools
 
