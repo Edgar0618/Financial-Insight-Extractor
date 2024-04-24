@@ -13,33 +13,23 @@ def extract_text_from_pdf(pdf_path):
             text += page.get_text()
     return text
 
+# Function to parse relevant data from text
 def parse_financial_data(text):
     patterns = {
-    'total_current_assets': r'Total Current Assets\s+\$(\d{1,3}(,\d{3})*)(?:\s+\$)?(\d{1,3}(,\d{3})*)(?: million USD)?',
-    'total_assets': r'Total Assets\s+\$(\d{1,3}(,\d{3})*)(?:\s+\$)?(\d{1,3}(,\d{3})*)(?: million USD)?',
-    'total_current_liabilities': r'Total Current Liabilities\s+\$(\d{1,3}(,\d{3})*)(?:\s+\$)?(\d{1,3}(,\d{3})*)(?: million USD)?',
-    'total_stockholders_equity': r"Total Stockholders' Equity\s+\$(\d{1,3}(,\d{3})*)(?:\s+\$)?(\d{1,3}(,\d{3})*)(?: million USD)?",
-    'total_liabilities_and_stockholders_equity': r"Total Liabilities and Stockholders' Equity\s+\$(\d{1,3}(,\d{3})*)(?:\s+\$)?(\d{1,3}(,\d{3})*)(?: million USD)?",
-    # Consolidated Statements of Operations
-    'net_income_loss': r'Net income \(loss\)\s+(\d{1,3}(,\d{3})*)(?:\s+)?(\d{1,3}(,\d{3})*)(?: million USD)?',
-    'net_cash_provided_by_operating_activities': r'Net cash provided by \(used in\) operating activities\s+(\d{1,3}(,\d{3})*)(?:\s+)?(\d{1,3}(,\d{3})*)(?: million USD)?',
-    'net_cash_used_in_investing_activities': r'Net cash used in investing activities\s+(\d{1,3}(,\d{3})*)(?:\s+)?(\d{1,3}(,\d{3})*)(?: million USD)?',
-    'net_cash_provided_by_financing_activities': r'Net cash provided by \(used in\) financing activities\s+(\d{1,3}(,\d{3})*)((?:\s+)?(\d{1,3}(,\d{3})*)(?: million USD)?',
-    'cash_end_of_period': r'CASH, CASH EQUIVALENTS, AND RESTRICTED CASH, END OF PERIOD\s+(\d{1,3}(,\d{3})*)(?:\s+)?(\d{1,3}(,\d{3})*)(?: million USD)?',
-    # Consolidated Statements of Cash Flows
-    'total_net_sales': r'Total Net Sales\s+(\d{1,3}(,\d{3})*)(?:\s+)?(\d{1,3}(,\d{3})*)(?: million USD)?',
-    'total_operating_expenses': r'Total Operating Expenses\s+(\d{1,3}(,\d{3})*)(?:\s+)?(\d{1,3}(,\d{3})*)(?: million USD)?',
-    'basic_earnings_per_share': r'Basic Earnings Per Share\s+(\d+\.\d+)(?:\s+)?(\d+\.\d+)?',
-    'diluted_earnings_per_share': r'Diluted Earnings Per Share\s+(\d+\.\d+)(?:\s+)?(\d+\.\d+)?',
+
+        'total_net_sales': r'Total net sales\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'total_operating_expenses': r'Total operating expenses\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'net_income': r'Net income \(loss\)\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'basic_earnings_per_share': r'Basic Earnings Per Share\s+(\-?\d+\.\d+)\s+(\-?\d+\.\d+)',
+        'diluted_earnings_per_share': r'Diluted Earnings Per Share\s+(\-?\d+\.\d+)\s+(\-?\d+\.\d+)',
     }
     data = {}
     for key, pattern in patterns.items():
-        match = re.search(pattern, text.replace('\n', ''))
+        match = re.search(pattern, text)
         if match:
-            # Assuming two groups per pattern (for two years, for example)
             data[key] = {
-                '2022': match.group(1),
-                '2023': match.group(2) or "Not found"  # The second group may be optional
+                '2022': match.group(1),  # First value in the line
+                '2023': match.group(2)   # Second value in the line
             }
         else:
             data[key] = {
@@ -247,31 +237,38 @@ def report():
         </tr>
         <tr>
             <td>Total Net Sales</td>
-            <td>{{ total_net_sales_2022 }}</td>
-            <td>{{ total_net_sales_2023 }}</td>
+            <td>{{ data['total_net_sales']['2022'] }}</td>
+            <td>{{ data['total_net_sales']['2023'] }}</td>
         </tr>
         <tr>
             <td>Total Operating Expenses</td>
-            <td>{{ total_operating_expenses_2022 }}</td>
-            <td>{{ total_operating_expenses_2023 }}</td>
+            <td>{{ data['total_operating_expenses']['2022'] }}</td>
+            <td>{{ data['total_operating_expenses']['2023'] }}</td>
         </tr>
         <tr>
             <td>Net income (loss)</td>
-            <td>{{ net_operating_cash_2022 }}</td>
-            <td>{{ net_operating_cash_2023 }}</td>
+            <!-- td>{{ net_operating_cash_2022 }}</td -->
+            <td>{{ data['net_income']['2022'] }}</td>
+            <td>{{ data['net_income']['2023'] }}</td>
         </tr>
         <tr>
             <td>Basic Earnings Per Share</td>
-            <td>{{ basic_earnings_per_share_2022 }}</td>
-            <td>{{ basic_earnings_per_share_2023 }}</td>
+            <td>{{ data['basic_earnings_per_share']['2022'] }}</td>
+            <td>{{ data['basic_earnings_per_share']['2023'] }}</td>
         </tr>
         <tr>
             <td>Diluted Earnings Per Share</td>
-            <td>{{ diluted_earnings_per_share_2022 }}</td>
-            <td>{{ diluted_earnings_per_share_2023 }}</td>
+            <td>{{ data['diluted_earnings_per_share']['2022'] }}</td>
+            <td>{{ data['diluted_earnings_per_share']['2023'] }}</td>
         </tr>
     <table>
 </div>
+
+    <!-- Existing Risk Factors section -->
+    <div class="report-container">
+        <h2>Risk Factors</h2>
+        <p>{{ risk_factors }}</p>
+    </div>
 </body>
 </html>
 """
@@ -279,3 +276,4 @@ def report():
 
 if __name__ == '__main__':
     app.run(debug=True, port = 5001)
+
