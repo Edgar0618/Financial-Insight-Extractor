@@ -13,17 +13,39 @@ def extract_text_from_pdf(pdf_path):
             text += page.get_text()
     return text
 
-# Function to parse relevant data from text
 def parse_financial_data(text):
     patterns = {
-        'net_sales': r'Net sales .+\$(\d+\.\d+) billion',
-        'operating_income': r'Operating income .+\$(\d+\.\d+) billion',
-        'net_income': r'Net income .+\$(\d+\.\d+) billion',
+    'total_current_assets': r'Total Current Assets\s+\$(\d{1,3}(,\d{3})*)(?:\s+\$)?(\d{1,3}(,\d{3})*)(?: million USD)?',
+    'total_assets': r'Total Assets\s+\$(\d{1,3}(,\d{3})*)(?:\s+\$)?(\d{1,3}(,\d{3})*)(?: million USD)?',
+    'total_current_liabilities': r'Total Current Liabilities\s+\$(\d{1,3}(,\d{3})*)(?:\s+\$)?(\d{1,3}(,\d{3})*)(?: million USD)?',
+    'total_stockholders_equity': r"Total Stockholders' Equity\s+\$(\d{1,3}(,\d{3})*)(?:\s+\$)?(\d{1,3}(,\d{3})*)(?: million USD)?",
+    'total_liabilities_and_stockholders_equity': r"Total Liabilities and Stockholders' Equity\s+\$(\d{1,3}(,\d{3})*)(?:\s+\$)?(\d{1,3}(,\d{3})*)(?: million USD)?",
+    # Consolidated Statements of Operations
+    'net_income_loss': r'Net income \(loss\)\s+(\d{1,3}(,\d{3})*)(?:\s+)?(\d{1,3}(,\d{3})*)(?: million USD)?',
+    'net_cash_provided_by_operating_activities': r'Net cash provided by \(used in\) operating activities\s+(\d{1,3}(,\d{3})*)(?:\s+)?(\d{1,3}(,\d{3})*)(?: million USD)?',
+    'net_cash_used_in_investing_activities': r'Net cash used in investing activities\s+(\d{1,3}(,\d{3})*)(?:\s+)?(\d{1,3}(,\d{3})*)(?: million USD)?',
+    'net_cash_provided_by_financing_activities': r'Net cash provided by \(used in\) financing activities\s+(\d{1,3}(,\d{3})*)((?:\s+)?(\d{1,3}(,\d{3})*)(?: million USD)?',
+    'cash_end_of_period': r'CASH, CASH EQUIVALENTS, AND RESTRICTED CASH, END OF PERIOD\s+(\d{1,3}(,\d{3})*)(?:\s+)?(\d{1,3}(,\d{3})*)(?: million USD)?',
+    # Consolidated Statements of Cash Flows
+    'total_net_sales': r'Total Net Sales\s+(\d{1,3}(,\d{3})*)(?:\s+)?(\d{1,3}(,\d{3})*)(?: million USD)?',
+    'total_operating_expenses': r'Total Operating Expenses\s+(\d{1,3}(,\d{3})*)(?:\s+)?(\d{1,3}(,\d{3})*)(?: million USD)?',
+    'basic_earnings_per_share': r'Basic Earnings Per Share\s+(\d+\.\d+)(?:\s+)?(\d+\.\d+)?',
+    'diluted_earnings_per_share': r'Diluted Earnings Per Share\s+(\d+\.\d+)(?:\s+)?(\d+\.\d+)?',
     }
     data = {}
     for key, pattern in patterns.items():
-        match = re.search(pattern, text)
-        data[key] = match.group(1) if match else "Not found"
+        match = re.search(pattern, text.replace('\n', ''))
+        if match:
+            # Assuming two groups per pattern (for two years, for example)
+            data[key] = {
+                '2022': match.group(1),
+                '2023': match.group(2) or "Not found"  # The second group may be optional
+            }
+        else:
+            data[key] = {
+                '2022': "Not found",
+                '2023': "Not found"
+            }
     return data
 
 @app.route('/report')
