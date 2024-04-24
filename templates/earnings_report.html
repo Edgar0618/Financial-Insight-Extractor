@@ -38,6 +38,8 @@
         }
 
         section {
+            display: flex;
+            justify-content: space-between;
             margin: 20px;
             padding: 20px;
             background: white;
@@ -45,36 +47,81 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
 
-        h2, p {
-            color: #333; 
+        .form-container {
+            flex: 1;
+            padding: 10px;
+        }
+
+        .graph-container {
+            flex: 1;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        label, input, button {
+            display: block;
+            margin: 10px 0;
+        }
+
+        input[type="text"], button {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background: #333;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #555;
+        }
+
+        img {
+            max-width: 100%; /* Ensures the image is not larger than the container */
+            height: auto;
+        }
+
+        h1, h2 {
+            color: #333;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>Quarterly Earnings Report</h1>
+        <h1>Earnings Report</h1>
         <ul>
             <li><a href="/">Home</a></li>
-            <li><a href="/profile">Profile</a></li>
             <li><a href="/logout">Log Out</a></li>
         </ul>
     </header>
     <section>
-        <form method="post">
-            <label for="Q1">Q1:</label>
-            <input type="text" id="Q1" name="Q1" value="{{ request.form['Q1'] }}">
-            <label for="Q2">Q2:</label>
-            <input type="text" id="Q2" name="Q2" value="{{request.form['Q2']}}">
-            <label for="Q3">Q3:</label>
-            <input type="text" id="Q3" name="Q3" value="{{request.form['Q3']}}">
-            <label for="Q4">Q4:</label>
-            <input type="text" id="Q4" name="Q4" value="{{request.form['Q4']}}">
-            <button type="submit">Submit</button>
-        </form>
-        {% if image %}
-        <h2>Earnings Report</h2>
-        <img src="data:image/png;base64,{{image}}" alt="earnings graph">
-        {% endif %}
+        <div class="graph-container">
+            {% if image %}
+                <img src="data:image/png;base64,{{image}}" alt="earnings graph">
+            {% else %}
+                <p>No graph available.</p>
+            {% endif %}
+        </div>
+        <div class="form-container">
+            <form method="post">
+                <label for="Q1">Q1:</label>
+                <input type="text" id="Q1" name="Q1" value="{{ request.form['Q1'] }}">
+                <label for="Q2">Q2:</label>
+                <input type="text" id="Q2" name="Q2" value="{{ request.form['Q2'] }}">
+                <label for="Q3">Q3:</label>
+                <input type="text" id="Q3" name="Q3" value="{{ request.form['Q3'] }}">
+                <label for="Q4">Q4:</label>
+                <input type="text" id="Q4" name="Q4" value="{{ request.form['Q4'] }}">
+                <button type="submit">Submit</button>
+            </form>
+        </div>
     </section>
 </body>
 </html>

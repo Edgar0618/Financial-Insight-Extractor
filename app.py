@@ -107,7 +107,6 @@ def upload_pdf():
         return "No selected file"
     return "File uploaded"
 
-
 @app.route('/compare', methods=['GET', 'POST'])
 def compare():
     if request.method == 'POST':
@@ -115,43 +114,52 @@ def compare():
         option = request.form.get('options')
         results = []
         total = 0
+        valid_data_count = 0  # To count entries with actual data for averaging
+
         if sector in sector_companies:
             for symbol in sector_companies[sector]:
                 ticker = yf.Ticker(symbol)
-                ticker.financials.index = ticker.financials.index.str.strip()
+                ticker.financials.index = ticker.financials.index.str.strip()  # Clean index names
                 try:
                     data_point = None
+                    # Check for the required financial metric based on user selection
                     if option == 'Net Income':
-                        data_point = ticker.financials.loc['Net Income'].iloc[
-                            0] if 'Net Income' in ticker.financials.index else 0
+                        data_point = ticker.financials.loc['Net Income'].iloc[0] if ('Net Income'
+                            in ticker.financials.index and ticker.financials.loc['Net Income'].iloc[0] != 0) else None
                     elif option == 'Revenue':
-                        data_point = ticker.financials.loc['Total Revenue'].iloc[
-                            0] if 'Total Revenue' in ticker.financials.index else 0
+                        data_point = ticker.financials.loc['Total Revenue'].iloc[0] if ('Total Revenue'
+                            in ticker.financials.index and ticker.financials.loc['Total Revenue'].iloc[0] != 0) else None
                     elif option == 'Earnings Per Share':
-                        data_point = ticker.info.get('revenuePerShare', 0)
+                        data_point = ticker.info.get('revenuePerShare', None)
                     elif option == 'Operating Income':
-                        data_point = ticker.financials.loc['Operating Income'].iloc[
-                            0] if 'Operating Income' in ticker.financials.index else 0
+                        data_point = ticker.financials.loc['Operating Income'].iloc[0] if ('Operating Income'
+                            in ticker.financials.index and ticker.financials.loc['Operating Income'].iloc[0] != 0) else None
                     elif option == 'Profit':
-                        data_point = ticker.financials.loc['Gross Profit'].iloc[
-                            0] if 'Gross Profit' in ticker.financials.index else 0
-                    #need net sales, cost of sales, total liabilities, and total assets
-                    if data_point is not None:
+                        data_point = ticker.financials.loc['Gross Profit'].iloc[0] if ('Gross Profit'
+                            in ticker.financials.index and ticker.financials.loc['Gross Profit'].iloc[0] != 0) else None
+
+                    if data_point is None:
+                        formatted_value = "Data Unavailable"
+                    else:
                         formatted_value = "{:,.2f}".format(data_point)
-                        results.append((symbol, formatted_value))
                         total += data_point
+                        valid_data_count += 1
+
+                    results.append((symbol, formatted_value))  # Move this outside the else to include both cases
+
                 except Exception as e:
                     print(f"Error getting data for {symbol}: {str(e)}")
+                    results.append((symbol, "Data Unavailable"))
 
             if results:
-                average = total / len(results)
-                formatted_average = "{:,.2f}".format(average)
-                return render_template('compare.html', results=results, average=formatted_average, sector=sector, option=option)
+                average = "{:,.2f}".format(total / valid_data_count) if valid_data_count else "Data Unavailable"
+                return render_template('compare.html', results=results, average=average, sector=sector, option=option)
             else:
                 return render_template('compare.html', message="No data available.")
         else:
             return render_template('compare.html', message="Invalid sector selected.")
     return render_template('compare.html')
+
 
 @app.route('/profile')
 def profile():
