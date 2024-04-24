@@ -48,9 +48,7 @@ def index():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    if 'username' in session:
-        return redirect(url_for('instructions'))
-
+    error = None
     if request.method == 'POST':
         db = createConnection()
         createCollection(db)
@@ -58,25 +56,53 @@ def register():
         password = request.form['password']
         name = request.form['name']
         date_of_birth = request.form['date_of_birth']
-        registerUser(db, username, password, name, date_of_birth)
-        return redirect(url_for('index'))
-    return render_template('register.html')
+        admin_checked = 'admin' in request.form
+        secret_key = request.form.get('secret_key', '')
+
+        correct_secret_key = "admin"
+        is_admin = admin_checked and secret_key == correct_secret_key
+
+        success, message = registerUser(db, username, password, name, date_of_birth, is_admin)
+        if success:
+            return redirect(url_for('index'))
+        else:
+            error = message
+
+    return render_template('register.html', error=error)
+
+@app.route('/admindashboard')
+def admin_dashboard():
+    if 'username' in session:
+        db = createConnection()
+        user = db.users.find_one({"username": session['username']})
+        if user and user.get('is_admin', False):
+            users = db.users.find({})
+            return render_template('admindashboard.html', users=users)
+        else:
+            return redirect(url_for('index'))
+    return redirect(url_for('login_page'))
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login_page():
     if 'username' in session:
+        # If user is already logged in, redirect to index
         return redirect(url_for('index'))
+
     error = None
     if request.method == 'POST':
         db = createConnection()
         username = request.form['username']
         password = request.form['password']
         hashed_password = hash_password(password)
+
         success, user = login(db, username, hashed_password)
         if success:
-            session['username'] = username
-            return redirect(url_for('index'))
+            session['username'] = username 
+            if user.get('is_admin', False):
+                return redirect(url_for('admin_dashboard'))
+            else:
+                return redirect(url_for('index'))
         else:
             error = "Invalid username or password"
 

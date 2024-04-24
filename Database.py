@@ -1,4 +1,4 @@
-from pymongo import MongoClient
+from pymongo import MongoClient, errors
 from PasswordHashing import hash_password
 
 def createConnection():
@@ -14,18 +14,19 @@ def createCollection(db):
     else:
         print("Collection 'users' already exists.")
 
-def registerUser(db, username, password, name, date_of_birth):
+def registerUser(db, username, password, name, date_of_birth, is_admin=False):
     hashed_password = hash_password(password)
     try:
         db.users.insert_one({
             "username": username,
             "password": hashed_password,
             "name": name,
-            "date_of_birth": date_of_birth
+            "date_of_birth": date_of_birth,
+            "is_admin": is_admin
         })
-        print(f"User {username} registered successfully!")
-    except pymongo.errors.DuplicateKeyError:
-        print("Username already exists. Try a different one.")
+        return True, f"User {username} registered successfully!"
+    except errors.DuplicateKeyError:
+        return False, "Username already exists. Try a different one."
 
 def login(db, username, hashed_password):
     user = db.users.find_one({"username": username, "password": hashed_password})
