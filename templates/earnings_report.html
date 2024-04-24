@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earnings Report</title>
+</head>
+<body>
+    <h1>Quarterly Earnings Report</h1>
+    <form method="post">
+        <label for="Q1">Q1:</label>
+        <input type="text" id="Q1" name="Q1" value="{{ request.form['Q1'] }}">
+        <label for="Q2">Q2:</label>
+        <input type="text" id="Q2" name="Q2" value="{{request.form['Q2']}}">
+        <label for="Q3">Q3:</label>
+        <input type="text" id="Q3" name="Q3" value="{{request.form['Q3']}}">
+        <label for="Q4">Q4:</label>
+        <input type="text" id="Q4" name="Q4" value="{{request.form['Q4']}}">
+        <button type="submit">Submit</button>
+    </form>
+    {% if image %}
+     <h2>Earnings Report</h2>
+     <img src="data:image/png;base64,{{image}}" alt="earnings graph">
+     {% endif %}
+</body>
+</html>

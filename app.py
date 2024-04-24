@@ -2,6 +2,12 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from Database import createConnection, createCollection, registerUser, login
 from PasswordHashing import hash_password, verify_password
 import yfinance as yf
+import matplotlib
+matplotlib.use('agg')
+import matplotlib.pyplot as plt
+import io
+import base64
+
 
 app = Flask(__name__)
 app.secret_key = '1'
@@ -18,6 +24,11 @@ sector_companies = {
     "Real_Estate": ["AGNC", "MPW", "VICI", "OPEN", "BEKE"],
     "Basic_Materials": ["VALE", "GOLD", "KGC", "FCX", "BTG"],
     "Consumer_Defensive": ["KVUE", "EDBL", "KO", "WMT", "ABEV"]
+}
+
+sample_earnings = {
+    'last_year':[20000, 25000, 18000, 30000],
+    'this_year':[0,0,0,0]
 }
 
 
@@ -188,6 +199,45 @@ def change_password():
             message = 'Current password is incorrect.'
 
     return render_template('change_password.html', message=message)
+
+
+@app.route('/earnings_report', methods=['GET', 'POST'])
+def earnings_report():
+    if request.method == 'POST':
+        try:
+            q1 = float(request.form.get('Q1', 0))
+            q2 = float(request.form.get('Q2', 0))
+            q3 = float(request.form.get('Q3', 0))
+            q4 = float(request.form.get('Q4', 0))
+            sample_earnings['this_year'] = [q1,q2,q3,q4]
+        except ValueError:
+            pass
+    img = quarterly_earnings()
+    return render_template('earnings_report.html',image = img)
+
+
+
+def quarterly_earnings():
+    quarters = ['Q1','Q2','Q3','Q4']
+    x = range(len(quarters))
+
+    fig, ax = plt.subplots()
+    ax.bar(x, sample_earnings['last_year'], width=0.35,label='Last Year')
+    ax.bar(x, sample_earnings['this_year'], width=0.35,label='This Year')
+
+    ax.set_xlabel('Quarters')
+    ax.set_ylabel('Earnings ($)')
+    ax.set_title('Quarterly Earnings Comparison')
+    ax.set_xticks([p + 0.17 for p in x])
+    ax.set_xticklabels(quarters)
+    ax.legend()
+
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    image_base64 = base64.b64encode(buf.read()).decode('utf-8')
+    buf.close()
+    return image_base64
 
 if __name__ == '__main__':
     app.run(debug=True)
