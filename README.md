@@ -31,6 +31,10 @@
      ```bash
      pip3 install yfinance
      ```
+   - Install matplotlib:
+     ```bash
+     pip3 install matplotlib
+     ```
 
 ## Optional Tools
 

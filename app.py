@@ -1,24 +1,37 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from Database import createConnection, createCollection, registerUser, login
-from PasswordHashing import hash_password
+from PasswordHashing import hash_password, verify_password
 import yfinance as yf
+import matplotlib
+matplotlib.use('agg')
+import matplotlib.pyplot as plt
+import io
+import base64
+
 
 app = Flask(__name__)
-app.secret_key ='1'
+app.secret_key = '1'
 
 sector_companies = {
-    "Financial" : ["AGBA", "SQQQ", "TQQQ", "SPY", "MARA"],
-    "Tech" : ["MTTR", "NVDA", "AMD", "AAPL", "INTC"],
-    "Communication_services" : ["T", "VZ","AMC","GOOGL","SNAP"],
-    "Healthcare" : ["JAGX", "NIVF", "MLEC", "DNA","SINT"],
-    "Energy" : ["PBR", "TEL","RIG","KMI", "XOM"],
-    "Utilities" : ["NEE","PCG","AES","SO","EXC"],
-    "Consumer_Cyclical" : ["TSLA","F","NIO","FFIE","AMZN"],
-    "Industrials" : ["SPCB","NKLA","FCEL","SPCE","AAL"],
-    "Real_Estate" : ["AGNC","MPW","VICI","OPEN","BEKE"],
-    "Basic_Materials" : ["VALE","GOLD","KGC","FCX","BTG"],
-    "Consumer_Defensive" : ["KVUE","EDBL","KO","WMT","ABEV"]
+    "Financial": ["AGBA", "SQQQ", "TQQQ", "SPY", "MARA"],
+    "Tech": ["MTTR", "NVDA", "AMD", "AAPL", "INTC"],
+    "Communication_services": ["T", "VZ", "AMC", "GOOGL", "SNAP"],
+    "Healthcare": ["JAGX", "NIVF", "MLEC", "DNA", "SINT"],
+    "Energy": ["PBR", "TEL", "RIG", "KMI", "XOM"],
+    "Utilities": ["NEE", "PCG", "AES", "SO", "EXC"],
+    "Consumer_Cyclical": ["TSLA", "F", "NIO", "FFIE", "AMZN"],
+    "Industrials": ["SPCB", "NKLA", "FCEL", "SPCE", "AAL"],
+    "Real_Estate": ["AGNC", "MPW", "VICI", "OPEN", "BEKE"],
+    "Basic_Materials": ["VALE", "GOLD", "KGC", "FCX", "BTG"],
+    "Consumer_Defensive": ["KVUE", "EDBL", "KO", "WMT", "ABEV"]
 }
+
+sample_earnings = {
+    'last_year':[20000, 25000, 18000, 30000],
+    'this_year':[0,0,0,0]
+}
+
+
 @app.route('/')
 def index():
     if 'username' in session:
@@ -29,6 +42,7 @@ def index():
         else:
             return "User not found!", 404
     return render_template('index.html', name="Guest", is_logged_in=False)
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -46,10 +60,11 @@ def register():
         return redirect(url_for('index'))
     return render_template('register.html')
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login_page():
     if 'username' in session:
-        return redirect(url_for('instructions'))
+        return redirect(url_for('index'))
     error = None
     if request.method == 'POST':
         db = createConnection()
@@ -59,11 +74,12 @@ def login_page():
         success, user = login(db, username, hashed_password)
         if success:
             session['username'] = username
-            return redirect(url_for('instructions'))
+            return redirect(url_for('index'))
         else:
             error = "Invalid username or password"
-    
+
     return render_template('login.html', error=error)
+
 
 @app.route('/logout')
 def logout():
@@ -76,7 +92,7 @@ def instructions():
     if 'username' in session:
         db = createConnection()
         user = db.users.find_one({"username": session['username']})
-        return render_template('instructions.html',name=user['name'])
+        return render_template('instructions.html', name=user['name'])
     return render_template('instructions.html')
 
 
@@ -91,54 +107,124 @@ def upload_pdf():
         return "No selected file"
     return "File uploaded"
 
+
 @app.route('/compare', methods=['GET', 'POST'])
 def compare():
-    #msft = yf.Ticker("MSFT")
-    #print(msft.info)
-    sector = request.form.get('sectors')
-    option = request.form.get('options')
-    results=[]
-
-    if sector in sector_companies:
-        for symbol in sector_companies[sector]:
+    if request.method == 'POST':
+        sector = request.form.get('sectors')
+        option = request.form.get('options')
+        results = []
+        total = 0
+        if sector in sector_companies:
+            for symbol in sector_companies[sector]:
                 ticker = yf.Ticker(symbol)
-                try: 
-                    if option == 'net_income':
-                        income_statement = ticker.financials
-                        result = income_statement.loc['Net Income'][0]
-    
-                    elif option == 'revenue':
-                        revenue_statement = ticker.financials
-                        result = revenue_statement.loc['Total Revenue'][0]
-
-                    elif option == 'earnings_per_share':
-                        info = ticker.info
-                        if 'revenuePerShare' in info:
-                            result = info['revenuePerShare']
-                        else:
-                            print("No revenue per share data for", symbol)
-                    else:
-                        continue
-
-                    results.append(result)
+                ticker.financials.index = ticker.financials.index.str.strip()
+                try:
+                    data_point = None
+                    if option == 'Net Income':
+                        data_point = ticker.financials.loc['Net Income'].iloc[
+                            0] if 'Net Income' in ticker.financials.index else 0
+                    elif option == 'Revenue':
+                        data_point = ticker.financials.loc['Total Revenue'].iloc[
+                            0] if 'Total Revenue' in ticker.financials.index else 0
+                    elif option == 'Earnings Per Share':
+                        data_point = ticker.info.get('revenuePerShare', 0)
+                    elif option == 'Operating Income':
+                        data_point = ticker.financials.loc['Operating Income'].iloc[
+                            0] if 'Operating Income' in ticker.financials.index else 0
+                    elif option == 'Profit':
+                        data_point = ticker.financials.loc['Gross Profit'].iloc[
+                            0] if 'Gross Profit' in ticker.financials.index else 0
+                    #need net sales, cost of sales, total liabilities, and total assets
+                    if data_point is not None:
+                        formatted_value = "{:,.2f}".format(data_point)
+                        results.append((symbol, formatted_value))
+                        total += data_point
                 except Exception as e:
-                    print("Error getting datra for symbl {symbol}: {e}")
-        
-        if results:
-            avg_result = sum(results) / len(results)
-            result_txt = f"Avg: {option} for {sector}: ${avg_result:,.2f}"
+                    print(f"Error getting data for {symbol}: {str(e)}")
+
+            if results:
+                average = total / len(results)
+                formatted_average = "{:,.2f}".format(average)
+                return render_template('compare.html', results=results, average=formatted_average, sector=sector, option=option)
+            else:
+                return render_template('compare.html', message="No data available.")
         else:
-            result_txt = "Wont work spongebob"
-
-        return render_template('compare.html', result = result_txt)
-
+            return render_template('compare.html', message="Invalid sector selected.")
     return render_template('compare.html')
-    
+
+@app.route('/profile')
+def profile():
+    if 'username' in session:
+        db = createConnection()
+        user = db.users.find_one({"username": session['username']})
+        if user:
+            return render_template('profile.html', name=user['name'], username=user['username'])
+        else:
+            return "User not found!", 404
+    return render_template('compare.html')
+
+@app.route('/change_password', methods=['GET', 'POST'])
+def change_password():
+    if 'username' not in session:
+        return redirect(url_for('login_page'))
+
+    message = ""  # Variable to store message to the user
+    if request.method == 'POST':
+        current_password = request.form['current_password']
+        new_password = request.form['new_password']
+        db = createConnection()
+        user = db.users.find_one({"username": session['username']})
+
+        if user and verify_password(user['password'], current_password):
+            hashed_new_password = hash_password(new_password)
+            # Update the password in the database
+            db.users.update_one({"username": session['username']}, {"$set": {"password": hashed_new_password}})
+            message = 'Password successfully changed.'
+            return redirect(url_for('profile'))  # Redirect to profile with a success message or you could pass message through query parameter
+        else:
+            message = 'Current password is incorrect.'
+
+    return render_template('change_password.html', message=message)
 
 
-    #sectors:Financial, Tech, Communication services, Healthcare,Energy, Utilities, 
-    #Consumer Cyclical, Industrials, Real Estate, Basic Materials, Financials
+@app.route('/earnings_report', methods=['GET', 'POST'])
+def earnings_report():
+    if request.method == 'POST':
+        try:
+            q1 = float(request.form.get('Q1', 0))
+            q2 = float(request.form.get('Q2', 0))
+            q3 = float(request.form.get('Q3', 0))
+            q4 = float(request.form.get('Q4', 0))
+            sample_earnings['this_year'] = [q1,q2,q3,q4]
+        except ValueError:
+            pass
+    img = quarterly_earnings()
+    return render_template('earnings_report.html',image = img)
 
+
+
+def quarterly_earnings():
+    quarters = ['Q1','Q2','Q3','Q4']
+    x = range(len(quarters))
+
+    fig, ax = plt.subplots()
+    ax.bar(x, sample_earnings['last_year'], width=0.35,label='Last Year')
+    ax.bar(x, sample_earnings['this_year'], width=0.35,label='This Year')
+
+    ax.set_xlabel('Quarters')
+    ax.set_ylabel('Earnings ($)')
+    ax.set_title('Quarterly Earnings Comparison')
+    ax.set_xticks([p + 0.17 for p in x])
+    ax.set_xticklabels(quarters)
+    ax.legend()
+
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    image_base64 = base64.b64encode(buf.read()).decode('utf-8')
+    buf.close()
+    return image_base64
 
 if __name__ == '__main__':
     app.run(debug=True)
