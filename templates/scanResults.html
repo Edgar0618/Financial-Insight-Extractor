@@ -10,6 +10,31 @@
             margin: 0;
             padding: 20px;
         }
+        header {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+        }
+        header ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        header ul li {
+            display: inline;
+            margin-right: 10px;
+        }
+        header ul li a {
+            color: black;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 8px 15px;
+            background: white;
+            border-radius: 5px;
+        }
+        header ul li a:hover {
+            background: lightgray;
+        }
         .report-container {
             background: #fff;
             padding: 20px;
@@ -20,7 +45,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            background-color: #f0f0f0;
+            background-color: #A9A9A9;
         }
         table, th, td {
             border: 1px solid #ddd;
@@ -38,11 +63,20 @@
         }
         h1 {
             text-align: center;
+            color: white;
         }
     </style>
     <title>Quarterly Earnings Report</title>
 </head>
 <body>
+    <header>
+        <h1>Consolidated Balance Sheets</h1>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/profile">Profile</a></li>
+            <li><a href="/logout">Log Out</a></li>
+        </ul>
+    </header>
      <!-- Live Market Data Bar section -->
         <div class="market-data-container">
             <h2>Live Market Data</h2>
@@ -53,7 +87,7 @@
             </div>
         </div>
         
-    <h1>Quarterly Earnings Report</h1>
+    <h2>Quarterly Earnings Report</h2>
     <div class="report-container">   
         <h2>{{ ticker_info.ticker }} Stock Information</h2>
         <p>Current Price: {{ ticker_info.current_price }}</p>
@@ -64,7 +98,6 @@
 
     <!-- Consolidated Balance Sheets table -->
 <div class="report-container">
-    <h2>Consolidated Balance Sheets</h2>
     <table>
         <tr>
             <th style="background-color: #337ab7;">Financial Metric</th>
@@ -110,33 +143,33 @@
         </tr>
         <tr>
             <td>CASH, CASH EQUIVALENTS, AND RESTRICTED CASH, BEGINNING OF PERIOD</td>
-            <td>{{ cash_beginning_2022 }}</td>
-            <td>{{ cash_beginning_2023 }}</td>
+            <td>{{ data['cash_beginning']['2022'] }}</td>
+            <td>{{ data['cash_beginning']['2023'] }}</td>
         </tr>
         <tr>
             <td>Net income (loss)</td>
-            <td>{{ net_income_2022 }}</td>
-            <td>{{ net_income_2023 }}</td>
+            <td>{{ data['net_income']['2022'] }}</td>
+            <td>{{ data['net_income']['2023'] }}</td>
         </tr>
         <tr>
             <td>Net cash provided by (used in) operating activities</td>
-            <td>{{ net_operating_cash_2022 }}</td>
-            <td>{{ net_operating_cash_2023 }}</td>
+            <td>{{ data['net_operating_cash']['2022'] }}</td>
+            <td>{{ data['net_operating_cash']['2023'] }}</td>
         </tr>
         <tr>
             <td>Net cash used in investing activities</td>
-            <td>{{ net_investing_cash_2022 }}</td>
-            <td>{{ net_investing_cash_2023 }}</td>
+            <td>{{ data['net_investing_cash']['2022'] }}</td>
+            <td>{{ data['net_investing_cash']['2023'] }}</td>
         </tr>
         <tr>
             <td>Net cash provided by (used in) financing activities</td>
-            <td>{{ net_financing_cash_2022 }}</td>
-            <td>{{ net_financing_cash_2023 }}</td>
+            <td>{{ data['net_financing_cash']['2022'] }}</td>
+            <td>{{ data['net_financing_cash']['2023'] }}</td>
         </tr>
         <tr>
             <td>CASH, CASH EQUIVALENTS, AND RESTRICTED CASH, END OF PERIOD</td>
-            <td>{{ cash_beginning_2022 }}</td>
-            <td>{{ cash_beginning_2023 }}</td>
+            <td>{{ data['cash_end']['2022'] }}</td>
+            <td>{{ data['cash_end']['2023'] }}</td>
         </tr>
     <table>
 </div>

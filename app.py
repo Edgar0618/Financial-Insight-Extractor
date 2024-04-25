@@ -138,8 +138,13 @@ def parse_financial_data(text):
         'total_current_liabilities': r'Total current liabilities\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
         'total_stockholders_equity': r'Total stockholders’ equity\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
         'total_liabilities_and_stockholders_equity': r'Total liabilities and stockholders’ equity\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
-        
 
+        'cash_beginning': r'CASH, CASH EQUIVALENTS, AND RESTRICTED CASH, BEGINNING OF PERIOD\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'net_income': r'Net income \(loss\)\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'net_operating_cash': r'Net cash provided by \(used in\) operating activities\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'net_investing_cash': r'Net cash used in investing activities\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'net_financing_cash': r'Net cash provided by \(used in\) financing activities\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'cash_end': r'CASH, CASH EQUIVALENTS, AND RESTRICTED CASH, END OF PERIOD\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
         
         'total_net_sales': r'Total net sales\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
         'total_operating_expenses': r'Total operating expenses\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
