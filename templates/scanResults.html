@@ -35,11 +35,30 @@
         header ul li a:hover {
             background: lightgray;
         }
+        .market-data-container {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .market-data-container h2 {
+            margin-top: 0;
+        }
+        .index-card {
+            display: inline-block;
+            background: #4CAF50;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
         .report-container {
             background: #fff;
             padding: 20px;
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border: 2px solid #4CAF50; 
         }
         table {
             width: 100%;
@@ -57,6 +76,7 @@
         th {
             background-color: #4CAF50;
             color: white;
+            border-radius: 5px 5px 0 0; /* Rounded corners for table headers */
         }
         tr:nth-child(even) {
             background-color: #f2f2f2;
@@ -78,16 +98,15 @@
             <li><a href="/logout">Log Out</a></li>
         </ul>
     </header>
-     <!-- Live Market Data Bar section -->
-        <div class="market-data-container">
-            <h2>Live Market Data</h2>
-            <div style="background-color: #f4f4f4; padding: 10px; margin-bottom: 20px;">
-                {% for name, value in live_market_data.items() %}
-                <span><strong>{{ name }}</strong>: {{ value }}</span> |
-                {% endfor %}
-            </div>
+    <!-- Live Market Data Bar section -->
+    <div class="market-data-container">
+        <h2>Live Market Data</h2>
+        <div>
+            {% for name, value in live_market_data.items() %}
+            <div class="index-card"><strong>{{ name }}</strong>: {{ value }}</div>
+            {% endfor %}
         </div>
-        
+    </div>
     <h2>Quarterly Earnings Report</h2>
     <div class="report-container">   
         <h2>{{ ticker_info.ticker }} Stock Information</h2>
@@ -204,16 +223,24 @@
             <td>{{ data['net_income']['2023'] }}</td>
         </tr>
         <tr>
-            <td>Basic Earnings Per Share</td>
-            <td>{{ data['basic_earnings_per_share']['2022'] }}</td>
-            <td>{{ data['basic_earnings_per_share']['2023'] }}</td>
+            <td>Weighted Average Shares Basic</td>
+            <td>{{ data['weighted_average_shares_basic']['2022'] }}</td>
+            <td>{{ data['weighted_average_shares_basic']['2023'] }}</td>
         </tr>
         <tr>
-            <td>Diluted Earnings Per Share</td>
-            <td>{{ data['diluted_earnings_per_share']['2022'] }}</td>
-            <td>{{ data['diluted_earnings_per_share']['2023'] }}</td>
+            <td>Diluted Average Shares Basic</td>
+            <td>{{ data['diluted_average_shares_basic']['2022'] }}</td>
+            <td>{{ data['diluted_average_shares_basic']['2023'] }}</td>
         </tr>
     <table>
+        <div class="report-container">
+            <h2>Consolidating Balance Sheet</h2>
+            <img src="data:image/png;base64,{{ image_assets_liabilities }}" alt="Assets and Liabilities Graph">
+        </div>        
+        <div class="report-container">
+            <h2>Consolidated Statements of Cash Flows</h2>
+            <img src="data:image/png;base64,{{ image_financial_data }}" alt="Financial Data Graph">
+        </div>        
 </div>
 
 </body>

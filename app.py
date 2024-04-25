@@ -134,23 +134,23 @@ def extract_text_from_pdf(pdf_stream):
 def parse_financial_data(text):
     patterns = {
         'total_current_assets': r'Total current assets\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
-        'total_assets': r'Total assets\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'total_assets': r'Total assets\s+\$\s*(\d{1,3}(?:,\d{3})*)\s+\$\s*(\d{1,3}(?:,\d{3})*)',
         'total_current_liabilities': r'Total current liabilities\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
         'total_stockholders_equity': r'Total stockholders’ equity\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
-        'total_liabilities_and_stockholders_equity': r'Total liabilities and stockholders’ equity\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'total_liabilities_and_stockholders_equity': r'Total liabilities and stockholders’ equity\s+\$\s*(\d{1,3}(?:,\d{3})*)(?:\s+\$\s*)(\d{1,3}(?:,\d{3})*)',
 
-        'cash_beginning': r'CASH, CASH EQUIVALENTS, AND RESTRICTED CASH, BEGINNING OF PERIOD\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'cash_beginning': r'CASH, CASH EQUIVALENTS, AND RESTRICTED CASH, BEGINNING OF PERIOD\s+\$\s*(\d{1,3}(?:,\d{3})*)\s+\$\s*(\d{1,3}(?:,\d{3})*)',
         'net_income': r'Net income \(loss\)\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
         'net_operating_cash': r'Net cash provided by \(used in\) operating activities\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
-        'net_investing_cash': r'Net cash used in investing activities\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
-        'net_financing_cash': r'Net cash provided by \(used in\) financing activities\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
-        'cash_end': r'CASH, CASH EQUIVALENTS, AND RESTRICTED CASH, END OF PERIOD\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
-        
+        'net_investing_cash': r'Net cash provided by \(used in\) investing activities\s+(\(\d{1,3}(?:,\d{3})*\))\s+(\(\d{1,3}(?:,\d{3})*\))',
+        'net_financing_cash': r'Net cash provided by \(used in\) financing activities\s+(-?\$?\d{1,3}(?:,\d{3})*|\(\$?\d{1,3}(?:,\d{3})*\))\s+(-?\$?\d{1,3}(?:,\d{3})*|\(\$?\d{1,3}(?:,\d{3})*\))',
+        'cash_end': r'CASH, CASH EQUIVALENTS, AND RESTRICTED CASH, END OF PERIOD\s+\$\s*(\d{1,3}(?:,\d{3})*)\s+\$\s*(\d{1,3}(?:,\d{3})*)',
+
         'total_net_sales': r'Total net sales\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
         'total_operating_expenses': r'Total operating expenses\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
         'net_income': r'Net income \(loss\)\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
-        'basic_earnings_per_share': r'Basic Earnings Per Share\s+(\-?\d+\.\d+)\s+(\-?\d+\.\d+)',
-        'diluted_earnings_per_share': r'Diluted Earnings Per Share\s+(\-?\d+\.\d+)\s+(\-?\d+\.\d+)',
+        'weighted_average_shares_basic': r'Basic\s+(\d{1,3}(?:,\d{3})*|\(\d{1,3}(?:,\d{3})*\))\s+(\d{1,3}(?:,\d{3})*|\(\d{1,3}(?:,\d{3})*\))',
+        'diluted_average_shares_basic': r'Diluted\s+(\d{1,3}(?:,\d{3})*|\(\d{1,3}(?:,\d{3})*\))\s+(\d{1,3}(?:,\d{3})*|\(\d{1,3}(?:,\d{3})*\))',
     }
     data = {}
     for key, pattern in patterns.items():
@@ -177,25 +177,21 @@ def upload_pdf():
     if pdf_file and allowed_file(pdf_file.filename):
         text = extract_text_from_pdf(pdf_file.stream)
         data = parse_financial_data(text)
+
         # Prepare data for the plot
         try:
-            net_sales = [float(data['total_net_sales']['2022'].replace(',', '')),
-                         float(data['total_net_sales']['2023'].replace(',', ''))]
-            net_income = [float(data['net_income']['2022'].replace(',', '')),
-                          float(data['net_income']['2023'].replace(',', ''))]
-            total_operating_expenses = [float(data['total_operating_expenses']['2022'].replace(',', '')),
-                                        float(data['total_operating_expenses']['2023'].replace(',', ''))]
-            weighted_average_shares_basic = [float(data['weighted_average_shares_basic']['2022'].replace(',', '')),
-                                             float(data['weighted_average_shares_basic']['2023'].replace(',', ''))]
-            diluted_average_shares_basic = [float(data['diluted_average_shares_basic']['2022'].replace(',', '')),
-                                            float(data['diluted_average_shares_basic']['2023'].replace(',', ''))]
+            net_sales = [float(data['total_net_sales']['2022'].replace(',', '')), float(data['total_net_sales']['2023'].replace(',', ''))]
+            net_income = [float(data['net_income']['2022'].replace(',', '')), float(data['net_income']['2023'].replace(',', ''))]
+            total_operating_expenses = [float(data['total_operating_expenses']['2022'].replace(',', '')), float(data['total_operating_expenses']['2023'].replace(',', ''))]
+            weighted_average_shares_basic = [float(data['weighted_average_shares_basic']['2022'].replace(',', '')), float(data['weighted_average_shares_basic']['2023'].replace(',', ''))]
+            diluted_average_shares_basic = [float(data['diluted_average_shares_basic']['2022'].replace(',', '')), float(data['diluted_average_shares_basic']['2023'].replace(',', ''))]
         except ValueError:
-            net_sales = net_income = total_operating_expenses = weighted_average_shares_basic = diluted_average_shares_basic = [
-                0, 0]
+            net_sales = net_income = total_operating_expenses = weighted_average_shares_basic = diluted_average_shares_basic = [0, 0]
 
-        imgCSCF = plotCSCF(net_sales, net_income, total_operating_expenses, weighted_average_shares_basic,
-                           diluted_average_shares_basic)
+        imgCSCF = plotCSCF(net_sales, net_income, total_operating_expenses, weighted_average_shares_basic, diluted_average_shares_basic)
         imgCBS = plotCBS(data)
+
+        # Live market data for additional information display
         market_tickers = {
             'S&P 500': '^GSPC',
             'Dow 30': '^DJI',
@@ -212,7 +208,6 @@ def upload_pdf():
 
         tickerSymbol = 'MSFT'
         ticker_info = yf.Ticker(tickerSymbol).info
-
         other_ticker_data = {
             'ticker': tickerSymbol,
             'current_price': ticker_info.get('currentPrice', 'N/A'),
@@ -220,34 +215,87 @@ def upload_pdf():
             'week_change': ticker_info.get('52WeekChange', 'N/A'),
             'earnings_growth': ticker_info.get('earningsGrowth', 'N/A'),
         }
-        pdf_data = {
-            "data": data,
-            "live_market_data": live_market_data,
-            "ticker_info": other_ticker_data
-        }
-        save_pdf_data(session['username'], pdf_data)
 
         db = createConnection()
         logScan(db, session['username'], pdf_file.filename)
-        return render_template('scanResults.html', data=data, live_market_data=live_market_data, ticker_info=other_ticker_data)
+        return render_template('scanResults.html', data=data, live_market_data=live_market_data, ticker_info=other_ticker_data, image_financial_data=imgCSCF, image_assets_liabilities=imgCBS)
     else:
         return "Invalid file or no file selected", 400
 
-@app.route('/scan_results')
-def scan_results():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-    pdf_data = get_pdf_data(session['username'])
-    if not pdf_data:
-        return "No data found", 404
-    return render_template('resultsInCompare.html', **pdf_data)
-def save_pdf_data(user_id, pdf_data):
-    db = createConnection()
-    db.pdf_results.update_one(
-        {"user_id": user_id},
-        {"$set": pdf_data},
-        upsert=True
-    )
+def plotCBS(data):
+    # Extract data
+    categories = ['Total Current Assets', 'Total Assets', 'Total Current Liabilities', 'Total Stockholders\' Equity', 'Total Liabilities and Stockholders\' Equity']
+    values_2022 = [
+        float(data['total_current_assets']['2022'].replace(',', '')),
+        float(data['total_assets']['2022'].replace(',', '')),
+        float(data['total_current_liabilities']['2022'].replace(',', '')),
+        float(data['total_stockholders_equity']['2022'].replace(',', '')),
+        float(data['total_liabilities_and_stockholders_equity']['2022'].replace(',', ''))
+    ]
+    values_2023 = [
+        float(data['total_current_assets']['2023'].replace(',', '')),
+        float(data['total_assets']['2023'].replace(',', '')),
+        float(data['total_current_liabilities']['2023'].replace(',', '')),
+        float(data['total_stockholders_equity']['2023'].replace(',', '')),
+        float(data['total_liabilities_and_stockholders_equity']['2023'].replace(',', ''))
+    ]
+
+    # Plot
+    x = range(len(categories))  # the label locations
+    width = 0.35  # the width of the bars
+
+    fig, ax = plt.subplots()
+    rects1 = ax.bar([p - width/2 for p in x], values_2022, width, label='2022')
+    rects2 = ax.bar([p + width/2 for p in x], values_2023, width, label='2023')
+
+    ax.set_ylabel('Amount ($)')
+    ax.set_title('Financial Metrics by Year')
+    ax.set_xticks(x)
+    ax.set_xticklabels(categories, rotation=45, ha="right")
+    ax.legend()
+
+    # Adding labels on bars
+    def autolabel(rects):
+        for rect in rects:
+            height = rect.get_height()
+            ax.annotate('{}'.format(height),
+                        xy=(rect.get_x() + rect.get_width() / 2, height),
+                        xytext=(0, 3),  # 3 points vertical offset
+                        textcoords="offset points",
+                        ha='center', va='bottom')
+
+    autolabel(rects1)
+    autolabel(rects2)
+
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', bbox_inches='tight')
+    plt.close(fig)
+    buf.seek(0)
+    image_base64 = base64.b64encode(buf.read()).decode('utf-8')
+    buf.close()
+    return image_base64
+
+# Eli's graph
+def plotCSCF(net_sales, net_income, total_operating_expenses, weighted_average_shares_basic, diluted_average_shares_basic):
+    years = ['2022', '2023']
+    fig, ax = plt.subplots()
+    ax.plot(years, net_sales, marker='o', linestyle='-', color='b', label='Total Net Sales')
+    ax.plot(years, net_income, marker='o', linestyle='-', color='r', label='Net Income')
+    ax.plot(years, total_operating_expenses, marker='o', linestyle='-', color='g', label='Total Operating Expenses')
+    ax.plot(years, weighted_average_shares_basic, marker='o', linestyle='-', color='m', label='Weighted Average Shares Basic')
+    ax.plot(years, diluted_average_shares_basic, marker='o', linestyle='-', color='y', label='Diluted Average Shares Basic')
+    ax.set_xlabel('Year')
+    ax.set_ylabel('Amount ($ or Units)')
+    ax.set_title('Financial Metrics Comparison Over Years')
+    ax.legend()
+
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    plt.close(fig)
+    buf.seek(0)
+    image_base64 = base64.b64encode(buf.read()).decode('utf-8')
+    buf.close()
+    return image_base64
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() == 'pdf'
@@ -375,18 +423,8 @@ def earnings_report():
     img = quarterly_earnings()
     return render_template('earnings_report.html',image = img, data=live_market_data)
 
-def get_pdf_data(user_id):
-    db = createConnection()
-    return db.pdf_results.find_one({"user_id": user_id})
-@app.route('/compare_pdf', methods=['GET', 'POST'])
-def compare_pdf():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-    pdf_data = get_pdf_data(session['username'])
-    if not pdf_data:
-        return "No data found", 404
-    # Implement comparison logic here if needed
-    return render_template('comparePDF.html', **pdf_data)
+
+
 
 def quarterly_earnings():
     quarters = ['Q1','Q2','Q3','Q4']
@@ -405,81 +443,6 @@ def quarterly_earnings():
 
     buf = io.BytesIO()
     plt.savefig(buf, format='png')
-    buf.seek(0)
-    image_base64 = base64.b64encode(buf.read()).decode('utf-8')
-    buf.close()
-    return image_base64
-
-def plotCBS(data):
-    # Extract data
-    categories = ['Total Current Assets', 'Total Assets', 'Total Current Liabilities', 'Total Stockholders\' Equity', 'Total Liabilities and Stockholders\' Equity']
-    values_2022 = [
-        float(data['total_current_assets']['2022'].replace(',', '')),
-        float(data['total_assets']['2022'].replace(',', '')),
-        float(data['total_current_liabilities']['2022'].replace(',', '')),
-        float(data['total_stockholders_equity']['2022'].replace(',', '')),
-        float(data['total_liabilities_and_stockholders_equity']['2022'].replace(',', ''))
-    ]
-    values_2023 = [
-        float(data['total_current_assets']['2023'].replace(',', '')),
-        float(data['total_assets']['2023'].replace(',', '')),
-        float(data['total_current_liabilities']['2023'].replace(',', '')),
-        float(data['total_stockholders_equity']['2023'].replace(',', '')),
-        float(data['total_liabilities_and_stockholders_equity']['2023'].replace(',', ''))
-    ]
-
-    # Plot
-    x = range(len(categories))  # the label locations
-    width = 0.35  # the width of the bars
-
-    fig, ax = plt.subplots()
-    rects1 = ax.bar([p - width/2 for p in x], values_2022, width, label='2022')
-    rects2 = ax.bar([p + width/2 for p in x], values_2023, width, label='2023')
-
-    ax.set_ylabel('Amount ($)')
-    ax.set_title('Financial Metrics by Year')
-    ax.set_xticks(x)
-    ax.set_xticklabels(categories, rotation=45, ha="right")
-    ax.legend()
-
-    # Adding labels on bars
-    def autolabel(rects):
-        for rect in rects:
-            height = rect.get_height()
-            ax.annotate('{}'.format(height),
-                        xy=(rect.get_x() + rect.get_width() / 2, height),
-                        xytext=(0, 3),  # 3 points vertical offset
-                        textcoords="offset points",
-                        ha='center', va='bottom')
-
-    autolabel(rects1)
-    autolabel(rects2)
-
-    buf = io.BytesIO()
-    plt.savefig(buf, format='png', bbox_inches='tight')
-    plt.close(fig)
-    buf.seek(0)
-    image_base64 = base64.b64encode(buf.read()).decode('utf-8')
-    buf.close()
-    return image_base64
-
-# Eli's graph
-def plotCSCF(net_sales, net_income, total_operating_expenses, weighted_average_shares_basic, diluted_average_shares_basic):
-    years = ['2022', '2023']
-    fig, ax = plt.subplots()
-    ax.plot(years, net_sales, marker='o', linestyle='-', color='b', label='Total Net Sales')
-    ax.plot(years, net_income, marker='o', linestyle='-', color='r', label='Net Income')
-    ax.plot(years, total_operating_expenses, marker='o', linestyle='-', color='g', label='Total Operating Expenses')
-    ax.plot(years, weighted_average_shares_basic, marker='o', linestyle='-', color='m', label='Weighted Average Shares Basic')
-    ax.plot(years, diluted_average_shares_basic, marker='o', linestyle='-', color='y', label='Diluted Average Shares Basic')
-    ax.set_xlabel('Year')
-    ax.set_ylabel('Amount ($ or Units)')
-    ax.set_title('Financial Metrics Comparison Over Years')
-    ax.legend()
-
-    buf = io.BytesIO()
-    plt.savefig(buf, format='png')
-    plt.close(fig)
     buf.seek(0)
     image_base64 = base64.b64encode(buf.read()).decode('utf-8')
     buf.close()

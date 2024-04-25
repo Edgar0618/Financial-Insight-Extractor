@@ -17,23 +17,27 @@ def parse_financial_data(text):
     patterns = {
 
         'total_current_assets': r'Total current assets\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
-        'total_assets': r'Total assets\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'total_assets': r'Total assets\s+\$\s*(\d{1,3}(?:,\d{3})*)\s+\$\s*(\d{1,3}(?:,\d{3})*)',
         'total_current_liabilities': r'Total current liabilities\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
         'total_stockholders_equity': r'Total stockholders’ equity\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
-        'total_liabilities_and_stockholders_equity': r'Total liabilities and stockholders’ equity\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'total_liabilities_and_stockholders_equity': r'Total liabilities and stockholders’ equity\s+\$\s*(\d{1,3}(?:,\d{3})*)(?:\s+\$\s*)(\d{1,3}(?:,\d{3})*)',
 
-        'cash_beginning': r'CASH, CASH EQUIVALENTS, AND RESTRICTED CASH, BEGINNING OF PERIOD\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'cash_beginning': r'CASH, CASH EQUIVALENTS, AND RESTRICTED CASH, BEGINNING OF PERIOD\s+\$\s*(\d{1,3}(?:,\d{3})*)\s+\$\s*(\d{1,3}(?:,\d{3})*)',
         'net_income': r'Net income \(loss\)\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
         'net_operating_cash': r'Net cash provided by \(used in\) operating activities\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
-        'net_investing_cash': r'Net cash used in investing activities\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
-        'net_financing_cash': r'Net cash provided by \(used in\) financing activities\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
-        'cash_end': r'CASH, CASH EQUIVALENTS, AND RESTRICTED CASH, END OF PERIOD\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
-        
+        'net_investing_cash': r'Net cash provided by \(used in\) investing activities\s+(\(\d{1,3}(?:,\d{3})*\))\s+(\(\d{1,3}(?:,\d{3})*\))',
+        'net_financing_cash': r'Net cash provided by \(used in\) financing activities\s+(-?\$?\d{1,3}(?:,\d{3})*|\(\$?\d{1,3}(?:,\d{3})*\))\s+(-?\$?\d{1,3}(?:,\d{3})*|\(\$?\d{1,3}(?:,\d{3})*\))',
+        'cash_end': r'CASH, CASH EQUIVALENTS, AND RESTRICTED CASH, END OF PERIOD\s+\$\s*(\d{1,3}(?:,\d{3})*)\s+\$\s*(\d{1,3}(?:,\d{3})*)',
+
         'total_net_sales': r'Total net sales\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
         'total_operating_expenses': r'Total operating expenses\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
         'net_income': r'Net income \(loss\)\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
-        'basic_earnings_per_share': r'Basic Earnings Per Share\s+(\-?\d+\.\d+)\s+(\-?\d+\.\d+)',
-        'diluted_earnings_per_share': r'Diluted Earnings Per Share\s+(\-?\d+\.\d+)\s+(\-?\d+\.\d+)',
+        'weighted_average_shares_basic': r'Basic\s+(\d{1,3}(?:,\d{3})*|\(\d{1,3}(?:,\d{3})*\))\s+(\d{1,3}(?:,\d{3})*|\(\d{1,3}(?:,\d{3})*\))',
+        'diluted_average_shares_basic': r'Diluted\s+(\d{1,3}(?:,\d{3})*|\(\d{1,3}(?:,\d{3})*\))\s+(\d{1,3}(?:,\d{3})*|\(\d{1,3}(?:,\d{3})*\))',
+
+
+
+
     }
     data = {}
     for key, pattern in patterns.items():
@@ -112,7 +116,7 @@ def report():
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            background-color: #f0f0f0;
+            background-color: #A9A9A9;
         }
         table, th, td {
             border: 1px solid #ddd;
@@ -262,14 +266,14 @@ def report():
             <td>{{ data['net_income']['2023'] }}</td>
         </tr>
         <tr>
-            <td>Basic Earnings Per Share</td>
-            <td>{{ data['basic_earnings_per_share']['2022'] }}</td>
-            <td>{{ data['basic_earnings_per_share']['2023'] }}</td>
+            <td>Weighted Average Shares Basic</td>
+            <td>{{ data['weighted_average_shares_basic']['2022'] }}</td>
+            <td>{{ data['weighted_average_shares_basic']['2023'] }}</td>
         </tr>
         <tr>
-            <td>Diluted Earnings Per Share</td>
-            <td>{{ data['diluted_earnings_per_share']['2022'] }}</td>
-            <td>{{ data['diluted_earnings_per_share']['2023'] }}</td>
+            <td>Diluted Average Shares Basic</td>
+            <td>{{ data['diluted_average_shares_basic']['2022'] }}</td>
+            <td>{{ data['diluted_average_shares_basic']['2023'] }}</td>
         </tr>
     <table>
 </div>
@@ -280,4 +284,3 @@ def report():
 
 if __name__ == '__main__':
     app.run(debug=True, port = 5001)
-
