@@ -37,9 +37,30 @@
             background: lightgray;
         }
 
+        .live-data{
+            text-align: center;
+            margin: 0px;
+            padding: 5px;
+            background: white;
+            color: black;
+            border-radius: 5px;
+            box-shadow: 0 0 10px black;
+            height: 10%;
+        }
+        .live-data ul{
+            display: inline-block;
+            padding: 0;
+        }
+
+        .live-data li{
+            display: inline;
+            margin-right: 15px;
+        }
+
         section {
             display: flex;
             justify-content: space-between;
+            flex-direction: reow;
             margin: 20px;
             padding: 20px;
             background: white;
@@ -47,18 +68,19 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
 
-        .form-container {
+        .form-container, .graph-container{
             flex: 1;
             padding: 10px;
+
         }
 
-        .graph-container {
+        /* .graph-container {
             flex: 1;
             padding: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-        }
+        } */
 
         label, input, button {
             display: block;
@@ -84,12 +106,15 @@
         }
 
         img {
-            max-width: 100%; /* Ensures the image is not larger than the container */
+            max-width: 100%; 
             height: auto;
         }
 
-        h1, h2 {
+        h1{
             color: white;
+        }
+        h2 {
+            color: black;
         }
     </style>
 </head>
@@ -102,6 +127,15 @@
             <li><a href="/logout">Log Out</a></li>
         </ul>
     </header>
+    
+        <div class="live-data">
+        <h2>Live Market Data</h1>
+        <ul>
+            {% for ticker, price in data.items() %}
+            <li>{{ ticker }}: {{ price }}</li>
+            {% endfor %}
+        </ul>
+        </div>
     <section>
         <div class="graph-container">
             {% if image %}
