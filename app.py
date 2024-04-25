@@ -5,6 +5,7 @@ import yfinance as yf
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import io
 import base64
 import fitz  # PyMuPDF
@@ -298,9 +299,29 @@ def change_password():
 
     return render_template('change_password.html', message=message)
 
+def fetch_ticker_info(ticker):
+    try:
+        ticker_info = yf.Ticker(ticker).info
+        return ticker_info.get('regularMarketPrice') or ticker_info.get('previousClose', 'N/A')
+    except Exception as exc:
+        print(f"{ticker} generated an exception: {exc}")
+        return 'N/A'
+
+def fetch_market_data(tickers):
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        futures = {executor.submit(fetch_ticker_info, ticker): ticker for ticker in tickers}
+        results = {}
+        for future in as_completed(futures):
+            ticker = futures[future]
+            result = future.result()
+            display_ticker = ticker.replace('^','')
+            results[display_ticker] = result
+    return results
 
 @app.route('/earnings_report', methods=['GET', 'POST'])
 def earnings_report():
+    tickers = ['AAPL', 'GOOGL', 'MSFT', '^GSPC','^DJI','^IXIC','^RUT']
+    live_market_data = fetch_market_data(tickers)
     if request.method == 'POST':
         try:
             q1 = float(request.form.get('Q1', 0))
@@ -311,7 +332,8 @@ def earnings_report():
         except ValueError:
             pass
     img = quarterly_earnings()
-    return render_template('earnings_report.html',image = img)
+    return render_template('earnings_report.html',image = img, data=live_market_data)
+
 
 
 
