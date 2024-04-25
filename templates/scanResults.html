@@ -20,6 +20,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            background-color: #f0f0f0;
         }
         table, th, td {
             border: 1px solid #ddd;
@@ -42,6 +43,7 @@
     <title>Quarterly Earnings Report</title>
 </head>
 <body>
+     <!-- Live Market Data Bar section -->
         <div class="market-data-container">
             <h2>Live Market Data</h2>
             <div style="background-color: #f4f4f4; padding: 10px; margin-bottom: 20px;">
@@ -60,6 +62,7 @@
         <p>Earnings Growth: {{ ticker_info.earnings_growth }}</p>
     </div>
 
+    <!-- Consolidated Balance Sheets table -->
 <div class="report-container">
     <h2>Consolidated Balance Sheets</h2>
     <table>
@@ -70,32 +73,33 @@
         </tr>
         <tr>
             <td>Total Current Assets</td>
-            <td>{{ current_assets_2022 }}</td>
-            <td>{{ current_assets_2023 }}</td>
+            <td>{{ data['total_current_assets']['2022']}}</td>
+            <td>{{ data['total_current_assets']['2023'] }}</td>
         </tr>
         <tr>
             <td>Total Assets</td>
-            <td>{{ total_assets_2022 }}</td>
-            <td>{{ total_assets_2023 }}</td>
+            <td>{{ data['total_assets']['2022'] }}</td>
+            <td>{{ data['total_assets']['2023'] }}</td>
         </tr>
         <tr>
             <td>Total Current Liabilities</td>
-            <td>{{ total_current_liabilities_2022 }}</td>
-            <td>{{ total_current_liabilities_2023 }}</td>
+            <td>{{ data['total_current_liabilities']['2022'] }}</td>
+            <td>{{ data['total_current_liabilities']['2023'] }}</td>
         </tr>
         <tr>
             <td>Total Stockholders' Equity</td>
-            <td>{{ total_current_liabilities_2022 }}</td>
-            <td>{{ total_current_liabilities_2023 }}</td>
+            <td>{{  data['total_stockholders_equity']['2022'] }}</td>
+            <td>{{  data['total_stockholders_equity']['2023'] }}</td>
         </tr>
         <tr>
             <td>Total Liabilities and Stockholders' Equity</td>
-            <td>{{ total_liabilities_and_stockholders_equity_2022 }}</td>
-            <td>{{ total_liabilities_and_stockholders_equity_2023 }}</td>
+            <td>{{ data['total_liabilities_and_stockholders_equity']['2022'] }}</td>
+            <td>{{ data['total_liabilities_and_stockholders_equity']['2023'] }}</td>
         </tr>
     </table>
 </div>
 
+   <!-- Consolidated Statements of Operations table -->
 <div class="report-container">
     <h2>Consolidated Statements of Operations </h2>
     <table>
@@ -140,6 +144,7 @@
     </table>
 </div>
 
+    <!-- Consolidated Statements of Cash Flows table -->
 <div class="report-container">
     <h2>Consolidated Statements of Cash Flows</h2>
     <table>
@@ -150,35 +155,31 @@
         </tr>
         <tr>
             <td>Total Net Sales</td>
-            <td>{{ total_net_sales_2022 }}</td>
-            <td>{{ total_net_sales_2023 }}</td>
+            <td>{{ data['total_net_sales']['2022'] }}</td>
+            <td>{{ data['total_net_sales']['2023'] }}</td>
         </tr>
         <tr>
             <td>Total Operating Expenses</td>
-            <td>{{ total_operating_expenses_2022 }}</td>
-            <td>{{ total_operating_expenses_2023 }}</td>
+            <td>{{ data['total_operating_expenses']['2022'] }}</td>
+            <td>{{ data['total_operating_expenses']['2023'] }}</td>
         </tr>
         <tr>
             <td>Net income (loss)</td>
-            <td>{{ net_operating_cash_2022 }}</td>
-            <td>{{ net_operating_cash_2023 }}</td>
+            <!-- td>{{ net_operating_cash_2022 }}</td -->
+            <td>{{ data['net_income']['2022'] }}</td>
+            <td>{{ data['net_income']['2023'] }}</td>
         </tr>
         <tr>
             <td>Basic Earnings Per Share</td>
-            <td>{{ basic_earnings_per_share_2022 }}</td>
-            <td>{{ basic_earnings_per_share_2023 }}</td>
+            <td>{{ data['basic_earnings_per_share']['2022'] }}</td>
+            <td>{{ data['basic_earnings_per_share']['2023'] }}</td>
         </tr>
         <tr>
             <td>Diluted Earnings Per Share</td>
-            <td>{{ diluted_earnings_per_share_2022 }}</td>
-            <td>{{ diluted_earnings_per_share_2023 }}</td>
+            <td>{{ data['diluted_earnings_per_share']['2022'] }}</td>
+            <td>{{ data['diluted_earnings_per_share']['2023'] }}</td>
         </tr>
     <table>
 </div>
-
-    <div class="report-container">
-        <h2>Risk Factors</h2>
-        <p>{{ risk_factors }}</p>
-    </div>
 </body>
 </html>

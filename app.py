@@ -133,14 +133,33 @@ def extract_text_from_pdf(pdf_stream):
 # Function to parse relevant data from text
 def parse_financial_data(text):
     patterns = {
-        'net_sales': r'Net sales .+\$(\d+\.\d+) billion',
-        'operating_income': r'Operating income .+\$(\d+\.\d+) billion',
-        'net_income': r'Net income .+\$(\d+\.\d+) billion',
+        'total_current_assets': r'Total current assets\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'total_assets': r'Total assets\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'total_current_liabilities': r'Total current liabilities\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'total_stockholders_equity': r'Total stockholders’ equity\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'total_liabilities_and_stockholders_equity': r'Total liabilities and stockholders’ equity\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        
+
+        
+        'total_net_sales': r'Total net sales\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'total_operating_expenses': r'Total operating expenses\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'net_income': r'Net income \(loss\)\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'basic_earnings_per_share': r'Basic Earnings Per Share\s+(\-?\d+\.\d+)\s+(\-?\d+\.\d+)',
+        'diluted_earnings_per_share': r'Diluted Earnings Per Share\s+(\-?\d+\.\d+)\s+(\-?\d+\.\d+)',
     }
     data = {}
     for key, pattern in patterns.items():
         match = re.search(pattern, text)
-        data[key] = match.group(1) if match else "Not found"
+        if match:
+            data[key] = {
+                '2022': match.group(1), 
+                '2023': match.group(2)  
+            }
+        else:
+            data[key] = {
+                '2022': "Not found",
+                '2023': "Not found"
+            }
     return data
 
 @app.route('/upload_pdf', methods=['POST'])
