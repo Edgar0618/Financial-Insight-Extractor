@@ -30,12 +30,14 @@ def parse_financial_data(text):
         'net_financing_cash': r'Net cash provided by \(used in\) financing activities\s+(-?\$?\d{1,3}(?:,\d{3})*|\(\$?\d{1,3}(?:,\d{3})*\))\s+(-?\$?\d{1,3}(?:,\d{3})*|\(\$?\d{1,3}(?:,\d{3})*\))',
         'cash_end': r'CASH, CASH EQUIVALENTS, AND RESTRICTED CASH, END OF PERIOD\s+\$\s*(\d{1,3}(?:,\d{3})*)\s+\$\s*(\d{1,3}(?:,\d{3})*)',
 
-        
         'total_net_sales': r'Total net sales\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
         'total_operating_expenses': r'Total operating expenses\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
         'net_income': r'Net income \(loss\)\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
-        'basic_earnings_per_share': r'Basic Earnings Per Share\s+\$(-?\d+\.\d+)\s+\$(-?\d+\.\d+)',
-        'diluted_earnings_per_share': r'Diluted Earnings Per Share\s+\$(-?\d+\.\d+)\s+\$(-?\d+\.\d+)',
+        'weighted_average_shares_basic': r'Basic\s+(\d{1,3}(?:,\d{3})*|\(\d{1,3}(?:,\d{3})*\))\s+(\d{1,3}(?:,\d{3})*|\(\d{1,3}(?:,\d{3})*\))',
+        'diluted_average_shares_basic': r'Diluted\s+(\d{1,3}(?:,\d{3})*|\(\d{1,3}(?:,\d{3})*\))\s+(\d{1,3}(?:,\d{3})*|\(\d{1,3}(?:,\d{3})*\))',
+
+
+
 
     }
     data = {}
@@ -265,14 +267,14 @@ def report():
             <td>{{ data['net_income']['2023'] }}</td>
         </tr>
         <tr>
-            <td>Basic Earnings Per Share</td>
-            <td>{{ data['basic_earnings_per_share']['2022'] }}</td>
-            <td>{{ data['basic_earnings_per_share']['2023'] }}</td>
+            <td>Weighted Average Shares Basic</td>
+            <td>{{ data['weighted_average_shares_basic']['2022'] }}</td>
+            <td>{{ data['weighted_average_shares_basic']['2023'] }}</td>
         </tr>
         <tr>
-            <td>Diluted Earnings Per Share</td>
-            <td>{{ data['diluted_earnings_per_share']['2022'] }}</td>
-            <td>{{ data['diluted_earnings_per_share']['2023'] }}</td>
+            <td>Diluted Average Shares Basic</td>
+            <td>{{ data['diluted_average_shares_basic']['2022'] }}</td>
+            <td>{{ data['diluted_average_shares_basic']['2023'] }}</td>
         </tr>
     <table>
 </div>
