@@ -190,6 +190,7 @@ def upload_pdf():
 
         imgCSCF = plotCSCF(net_sales, net_income, total_operating_expenses, weighted_average_shares_basic, diluted_average_shares_basic)
         imgCBS = plotCBS(data)
+        imgCSO = plotCSO(data)
 
         # Live market data for additional information display
         market_tickers = {
@@ -218,7 +219,7 @@ def upload_pdf():
 
         db = createConnection()
         logScan(db, session['username'], pdf_file.filename)
-        return render_template('scanResults.html', data=data, live_market_data=live_market_data, ticker_info=other_ticker_data, image_financial_data=imgCSCF, image_assets_liabilities=imgCBS)
+        return render_template('scanResults.html', data=data, live_market_data=live_market_data, ticker_info=other_ticker_data, imageCSCF=imgCSCF, imageCBS=imgCBS, imageCSO=imgCSO)
     else:
         return "Invalid file or no file selected", 400
 
@@ -260,12 +261,54 @@ def plotCBS(data):
             height = rect.get_height()
             ax.annotate('{}'.format(height),
                         xy=(rect.get_x() + rect.get_width() / 2, height),
-                        xytext=(0, 3),  # 3 points vertical offset
+                        xytext=(0, 3), 
                         textcoords="offset points",
                         ha='center', va='bottom')
 
     autolabel(rects1)
     autolabel(rects2)
+
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', bbox_inches='tight')
+    plt.close(fig)
+    buf.seek(0)
+    image_base64 = base64.b64encode(buf.read()).decode('utf-8')
+    buf.close()
+    return image_base64
+
+def plotCSO(data):
+    categories = [
+        'CASH, CASH EQUIVALENTS, AND RESTRICTED CASH, BEGINNING OF PERIOD',
+        'Net income (loss)',
+        'Net cash provided by (used in) operating activities',
+        'Net cash used in investing activities',
+        'Net cash provided by (used in) financing activities',
+        'CASH, CASH EQUIVALENTS, AND RESTRICTED CASH, END OF PERIOD'
+    ]
+    values_2022 = [
+        float(data['cash_beginning']['2022'].replace(',', '')),
+        float(data['net_income']['2022'].replace(',', '')),
+        float(data['net_operating_cash']['2022'].replace(',', '')),
+        float(data['net_investing_cash']['2022'].replace('(', '').replace(')', '').replace(',', '')),
+        float(data['net_financing_cash']['2022'].replace('(', '').replace(')', '').replace(',', '')),
+        float(data['cash_end']['2022'].replace(',', ''))
+    ]
+    values_2023 = [
+        float(data['cash_beginning']['2023'].replace(',', '')),
+        float(data['net_income']['2023'].replace(',', '')),
+        float(data['net_operating_cash']['2023'].replace(',', '')),
+        float(data['net_investing_cash']['2023'].replace('(', '').replace(')', '').replace(',', '')),
+        float(data['net_financing_cash']['2023'].replace('(', '').replace(')', '').replace(',', '')),
+        float(data['cash_end']['2023'].replace(',', ''))
+    ]
+
+    fig, ax = plt.subplots()
+    for i, category in enumerate(categories):
+        ax.plot(['2022', '2023'], [values_2022[i], values_2023[i]], marker='o', linestyle='-', label=category)
+
+    ax.set_ylabel('Amount ($)')
+    ax.set_title('Consolidated Statements of Operations')
+    ax.legend(loc='upper left', bbox_to_anchor=(1, 1))  
 
     buf = io.BytesIO()
     plt.savefig(buf, format='png', bbox_inches='tight')
@@ -307,15 +350,14 @@ def compare():
         option = request.form.get('options')
         results = []
         total = 0
-        valid_data_count = 0  # To count entries with actual data for averaging
+        valid_data_count = 0  
 
         if sector in sector_companies:
             for symbol in sector_companies[sector]:
                 ticker = yf.Ticker(symbol)
-                ticker.financials.index = ticker.financials.index.str.strip()  # Clean index names
+                ticker.financials.index = ticker.financials.index.str.strip()  
                 try:
                     data_point = None
-                    # Check for the required financial metric based on user selection
                     if option == 'Net Income':
                         data_point = ticker.financials.loc['Net Income'].iloc[0] if ('Net Income'
                             in ticker.financials.index and ticker.financials.loc['Net Income'].iloc[0] != 0) else None
@@ -338,7 +380,7 @@ def compare():
                         total += data_point
                         valid_data_count += 1
 
-                    results.append((symbol, formatted_value))  # Move this outside the else to include both cases
+                    results.append((symbol, formatted_value)) 
 
                 except Exception as e:
                     print(f"Error getting data for {symbol}: {str(e)}")
@@ -370,7 +412,7 @@ def change_password():
     if 'username' not in session:
         return redirect(url_for('login_page'))
 
-    message = ""  # Variable to store message to the user
+    message = "" 
     if request.method == 'POST':
         current_password = request.form['current_password']
         new_password = request.form['new_password']
@@ -379,10 +421,9 @@ def change_password():
 
         if user and verify_password(user['password'], current_password):
             hashed_new_password = hash_password(new_password)
-            # Update the password in the database
             db.users.update_one({"username": session['username']}, {"$set": {"password": hashed_new_password}})
             message = 'Password successfully changed.'
-            return redirect(url_for('profile'))  # Redirect to profile with a success message or you could pass message through query parameter
+            return redirect(url_for('profile'))  
         else:
             message = 'Current password is incorrect.'
 
