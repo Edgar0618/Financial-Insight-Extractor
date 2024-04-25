@@ -526,7 +526,7 @@ def scan_results():
     pdf_data = get_pdf_data(session['username'])
     if not pdf_data:
         return "No data found", 404
-    return render_template('scanResults.html', **pdf_data)
+    return render_template('resultsInCompare.html', **pdf_data)
 
 @app.route('/compare_pdf', methods=['GET', 'POST'])
 def compare_pdf():
