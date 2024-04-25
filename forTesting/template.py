@@ -2,7 +2,6 @@ from flask import Flask, render_template_string
 import yfinance as yf
 import fitz  # PyMuPDF
 import re
-
 app = Flask(__name__)
 
 # Function to extract text from PDF

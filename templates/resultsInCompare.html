@@ -71,12 +71,6 @@
 <body>
     <header>
         <h1>Consolidated Balance Sheets</h1>
-        <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/compare_pdf">Compare PDF</a></li>
-            <li><a href="/profile">Profile</a></li>
-            <li><a href="/logout">Log Out</a></li>
-        </ul>
     </header>
      <!-- Live Market Data Bar section -->
         <div class="market-data-container">
@@ -87,9 +81,9 @@
                 {% endfor %}
             </div>
         </div>
-        
+
     <h2>Quarterly Earnings Report</h2>
-    <div class="report-container">   
+    <div class="report-container">
         <h2>{{ ticker_info.ticker }} Stock Information</h2>
         <p>Current Price: {{ ticker_info.current_price }}</p>
         <p>P/E Ratio: {{ ticker_info.pe_ratio }}</p>
@@ -215,6 +209,17 @@
         </tr>
     <table>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('a[href="/"], a[href*="home"]').forEach(function(link) {
+        link.addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent the default link behavior
+            // Send a message to the parent window
+            window.parent.postMessage('navigateHome', '*');
+        });
+    });
+});
+</script>
 
 </body>
 </html>

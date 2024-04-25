@@ -202,12 +202,34 @@ def upload_pdf():
             'week_change': ticker_info.get('52WeekChange', 'N/A'),
             'earnings_growth': ticker_info.get('earningsGrowth', 'N/A'),
         }
+        pdf_data = {
+            "data": data,
+            "live_market_data": live_market_data,
+            "ticker_info": other_ticker_data
+        }
+        save_pdf_data(session['username'], pdf_data)
 
         db = createConnection()
         logScan(db, session['username'], pdf_file.filename)
         return render_template('scanResults.html', data=data, live_market_data=live_market_data, ticker_info=other_ticker_data)
     else:
         return "Invalid file or no file selected", 400
+
+@app.route('/scan_results')
+def scan_results():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    pdf_data = get_pdf_data(session['username'])
+    if not pdf_data:
+        return "No data found", 404
+    return render_template('resultsInCompare.html', **pdf_data)
+def save_pdf_data(user_id, pdf_data):
+    db = createConnection()
+    db.pdf_results.update_one(
+        {"user_id": user_id},
+        {"$set": pdf_data},
+        upsert=True
+    )
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() == 'pdf'
@@ -335,8 +357,18 @@ def earnings_report():
     img = quarterly_earnings()
     return render_template('earnings_report.html',image = img, data=live_market_data)
 
-
-
+def get_pdf_data(user_id):
+    db = createConnection()
+    return db.pdf_results.find_one({"user_id": user_id})
+@app.route('/compare_pdf', methods=['GET', 'POST'])
+def compare_pdf():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    pdf_data = get_pdf_data(session['username'])
+    if not pdf_data:
+        return "No data found", 404
+    # Implement comparison logic here if needed
+    return render_template('comparePDF.html', **pdf_data)
 
 def quarterly_earnings():
     quarters = ['Q1','Q2','Q3','Q4']
@@ -359,6 +391,8 @@ def quarterly_earnings():
     image_base64 = base64.b64encode(buf.read()).decode('utf-8')
     buf.close()
     return image_base64
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
