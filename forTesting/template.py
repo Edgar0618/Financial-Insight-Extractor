@@ -22,8 +22,13 @@ def parse_financial_data(text):
         'total_current_liabilities': r'Total current liabilities\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
         'total_stockholders_equity': r'Total stockholders’ equity\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
         'total_liabilities_and_stockholders_equity': r'Total liabilities and stockholders’ equity\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
-        
 
+        'cash_beginning': r'CASH, CASH EQUIVALENTS, AND RESTRICTED CASH, BEGINNING OF PERIOD\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'net_income': r'Net income \(loss\)\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'net_operating_cash': r'Net cash provided by \(used in\) operating activities\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'net_investing_cash': r'Net cash used in investing activities\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'net_financing_cash': r'Net cash provided by \(used in\) financing activities\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'cash_end': r'CASH, CASH EQUIVALENTS, AND RESTRICTED CASH, END OF PERIOD\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
         
         'total_net_sales': r'Total net sales\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
         'total_operating_expenses': r'Total operating expenses\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
@@ -198,33 +203,33 @@ def report():
         </tr>
         <tr>
             <td>CASH, CASH EQUIVALENTS, AND RESTRICTED CASH, BEGINNING OF PERIOD</td>
-            <td>{{ cash_beginning_2022 }}</td>
-            <td>{{ cash_beginning_2023 }}</td>
+            <td>{{ data['cash_beginning']['2022'] }}</td>
+            <td>{{ data['cash_beginning']['2023'] }}</td>
         </tr>
         <tr>
             <td>Net income (loss)</td>
-            <td>{{ net_income_2022 }}</td>
-            <td>{{ net_income_2023 }}</td>
+            <td>{{ data['net_income']['2022'] }}</td>
+            <td>{{ data['net_income']['2023'] }}</td>
         </tr>
         <tr>
             <td>Net cash provided by (used in) operating activities</td>
-            <td>{{ net_operating_cash_2022 }}</td>
-            <td>{{ net_operating_cash_2023 }}</td>
+            <td>{{ data['net_operating_cash']['2022'] }}</td>
+            <td>{{ data['net_operating_cash']['2023'] }}</td>
         </tr>
         <tr>
             <td>Net cash used in investing activities</td>
-            <td>{{ net_investing_cash_2022 }}</td>
-            <td>{{ net_investing_cash_2023 }}</td>
+            <td>{{ data['net_investing_cash']['2022'] }}</td>
+            <td>{{ data['net_investing_cash']['2023'] }}</td>
         </tr>
         <tr>
             <td>Net cash provided by (used in) financing activities</td>
-            <td>{{ net_financing_cash_2022 }}</td>
-            <td>{{ net_financing_cash_2023 }}</td>
+            <td>{{ data['net_financing_cash']['2022'] }}</td>
+            <td>{{ data['net_financing_cash']['2023'] }}</td>
         </tr>
         <tr>
             <td>CASH, CASH EQUIVALENTS, AND RESTRICTED CASH, END OF PERIOD</td>
-            <td>{{ cash_beginning_2022 }}</td>
-            <td>{{ cash_beginning_2023 }}</td>
+            <td>{{ data['cash_end']['2022'] }}</td>
+            <td>{{ data['cash_end']['2023'] }}</td>
         </tr>
     <table>
 </div>
@@ -276,3 +281,4 @@ def report():
 
 if __name__ == '__main__':
     app.run(debug=True, port = 5001)
+

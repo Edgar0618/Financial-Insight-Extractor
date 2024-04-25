@@ -5,6 +5,7 @@ import yfinance as yf
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import io
 import base64
 import fitz  # PyMuPDF
@@ -137,8 +138,13 @@ def parse_financial_data(text):
         'total_current_liabilities': r'Total current liabilities\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
         'total_stockholders_equity': r'Total stockholders’ equity\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
         'total_liabilities_and_stockholders_equity': r'Total liabilities and stockholders’ equity\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
-        
 
+        'cash_beginning': r'CASH, CASH EQUIVALENTS, AND RESTRICTED CASH, BEGINNING OF PERIOD\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'net_income': r'Net income \(loss\)\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'net_operating_cash': r'Net cash provided by \(used in\) operating activities\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'net_investing_cash': r'Net cash used in investing activities\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'net_financing_cash': r'Net cash provided by \(used in\) financing activities\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'cash_end': r'CASH, CASH EQUIVALENTS, AND RESTRICTED CASH, END OF PERIOD\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
         
         'total_net_sales': r'Total net sales\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
         'total_operating_expenses': r'Total operating expenses\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
@@ -294,9 +300,29 @@ def change_password():
 
     return render_template('change_password.html', message=message)
 
+def fetch_ticker_info(ticker):
+    try:
+        ticker_info = yf.Ticker(ticker).info
+        return ticker_info.get('regularMarketPrice') or ticker_info.get('previousClose', 'N/A')
+    except Exception as exc:
+        print(f"{ticker} generated an exception: {exc}")
+        return 'N/A'
+
+def fetch_market_data(tickers):
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        futures = {executor.submit(fetch_ticker_info, ticker): ticker for ticker in tickers}
+        results = {}
+        for future in as_completed(futures):
+            ticker = futures[future]
+            result = future.result()
+            display_ticker = ticker.replace('^','')
+            results[display_ticker] = result
+    return results
 
 @app.route('/earnings_report', methods=['GET', 'POST'])
 def earnings_report():
+    tickers = ['AAPL', 'GOOGL', 'MSFT', '^GSPC','^DJI','^IXIC','^RUT']
+    live_market_data = fetch_market_data(tickers)
     if request.method == 'POST':
         try:
             q1 = float(request.form.get('Q1', 0))
@@ -307,7 +333,8 @@ def earnings_report():
         except ValueError:
             pass
     img = quarterly_earnings()
-    return render_template('earnings_report.html',image = img)
+    return render_template('earnings_report.html',image = img, data=live_market_data)
+
 
 
 
