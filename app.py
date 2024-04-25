@@ -207,7 +207,7 @@ def upload_pdf():
             individual_ticker_info = yf.Ticker(ticker).info
             live_market_data[name] = individual_ticker_info.get('regularMarketPrice') or individual_ticker_info.get('previousClose', 'N/A')
 
-        tickerSymbol = 'MSFT'
+        tickerSymbol = 'AMZN'
         ticker_info = yf.Ticker(tickerSymbol).info
         other_ticker_data = {
             'ticker': tickerSymbol,
