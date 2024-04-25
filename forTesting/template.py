@@ -13,10 +13,18 @@ def extract_text_from_pdf(pdf_path):
             text += page.get_text()
     return text
 
-# Function to parse relevant data from text
+# Function to parse data
 def parse_financial_data(text):
     patterns = {
 
+        'total_current_assets': r'Total current assets\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'total_assets': r'Total assets\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'total_current_liabilities': r'Total current liabilities\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'total_stockholders_equity': r'Total stockholders’ equity\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        'total_liabilities_and_stockholders_equity': r'Total liabilities and stockholders’ equity\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
+        
+
+        
         'total_net_sales': r'Total net sales\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
         'total_operating_expenses': r'Total operating expenses\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
         'net_income': r'Net income \(loss\)\s+(\d{1,3}(?:,\d{3})*)\s+(\d{1,3}(?:,\d{3})*)',
@@ -28,8 +36,8 @@ def parse_financial_data(text):
         match = re.search(pattern, text)
         if match:
             data[key] = {
-                '2022': match.group(1),  # First value in the line
-                '2023': match.group(2)   # Second value in the line
+                '2022': match.group(1), 
+                '2023': match.group(2)  
             }
         else:
             data[key] = {
@@ -44,11 +52,10 @@ def report():
     text = extract_text_from_pdf(pdf_path)
     data = parse_financial_data(text)
 
-    tickerSymbol = 'MSFT'  # Example for Microsoft Corporation
+    tickerSymbol = 'MSFT'
     tickerData = yf.Ticker(tickerSymbol)
     ticker_info = tickerData.info
 
-    # Fetch live market data for the indices and commodities
     market_tickers = {
         'S&P 500': '^GSPC',
         'Dow 30': '^DJI',
@@ -60,8 +67,7 @@ def report():
 
     live_market_data = {}
     for name, ticker in market_tickers.items():
-        individual_ticker_info = yf.Ticker(ticker).info  # Get the info for each market ticker
-        # Fallback to 'previousClose' if 'regularMarketPrice' is not available, then to 'N/A'
+        individual_ticker_info = yf.Ticker(ticker).info 
         live_market_data[name] = individual_ticker_info.get('regularMarketPrice') or individual_ticker_info.get('previousClose', 'N/A')
 
 
@@ -73,11 +79,10 @@ def report():
         'earnings_growth': ticker_info.get('earningsGrowth', 'N/A'),
     }
 
-    # Prepare the final data to pass to the template
     final_data = {
-        'data': data,  # Financial data from the PDF
-        'ticker_info': other_ticker_data,  # Information about Microsoft stock
-        'live_market_data': live_market_data,  # Live market data for indices and commodities
+        'data': data,
+        'ticker_info': other_ticker_data,
+        'live_market_data': live_market_data,
     }
 
     html_template = """
@@ -103,6 +108,7 @@ def report():
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            background-color: #f0f0f0;
         }
         table, th, td {
             border: 1px solid #ddd;
@@ -155,28 +161,28 @@ def report():
         </tr>
         <tr>
             <td>Total Current Assets</td>
-            <td>{{ current_assets_2022 }}</td>
-            <td>{{ current_assets_2023 }}</td>
+            <td>{{ data['total_current_assets']['2022']}}</td>
+            <td>{{ data['total_current_assets']['2023'] }}</td>
         </tr>
         <tr>
             <td>Total Assets</td>
-            <td>{{ total_assets_2022 }}</td>
-            <td>{{ total_assets_2023 }}</td>
+            <td>{{ data['total_assets']['2022'] }}</td>
+            <td>{{ data['total_assets']['2023'] }}</td>
         </tr>
         <tr>
             <td>Total Current Liabilities</td>
-            <td>{{ total_current_liabilities_2022 }}</td>
-            <td>{{ total_current_liabilities_2023 }}</td>
+            <td>{{ data['total_current_liabilities']['2022'] }}</td>
+            <td>{{ data['total_current_liabilities']['2023'] }}</td>
         </tr>
         <tr>
             <td>Total Stockholders' Equity</td>
-            <td>{{ total_current_liabilities_2022 }}</td>
-            <td>{{ total_current_liabilities_2023 }}</td>
+            <td>{{  data['total_stockholders_equity']['2022'] }}</td>
+            <td>{{  data['total_stockholders_equity']['2023'] }}</td>
         </tr>
         <tr>
             <td>Total Liabilities and Stockholders' Equity</td>
-            <td>{{ total_liabilities_and_stockholders_equity_2022 }}</td>
-            <td>{{ total_liabilities_and_stockholders_equity_2023 }}</td>
+            <td>{{ data['total_liabilities_and_stockholders_equity']['2022'] }}</td>
+            <td>{{ data['total_liabilities_and_stockholders_equity']['2023'] }}</td>
         </tr>
     </table>
 </div>
@@ -263,12 +269,6 @@ def report():
         </tr>
     <table>
 </div>
-
-    <!-- Existing Risk Factors section -->
-    <div class="report-container">
-        <h2>Risk Factors</h2>
-        <p>{{ risk_factors }}</p>
-    </div>
 </body>
 </html>
 """
@@ -276,4 +276,3 @@ def report():
 
 if __name__ == '__main__':
     app.run(debug=True, port = 5001)
-
