@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session, render_template_string
-from Database import createConnection, createCollection, registerUser, login
+from Database import createConnection, createCollection, registerUser, login, logScan
 from PasswordHashing import hash_password, verify_password
 import yfinance as yf
 import matplotlib
@@ -9,7 +9,6 @@ import io
 import base64
 import fitz  # PyMuPDF
 import re
-
 
 app = Flask(__name__)
 app.secret_key = '1'
@@ -198,6 +197,8 @@ def upload_pdf():
             'earnings_growth': ticker_info.get('earningsGrowth', 'N/A'),
         }
 
+        db = createConnection()
+        logScan(db, session['username'], pdf_file.filename)
         return render_template('scanResults.html', data=data, live_market_data=live_market_data, ticker_info=other_ticker_data)
     else:
         return "Invalid file or no file selected", 400
@@ -265,7 +266,7 @@ def profile():
         db = createConnection()
         user = db.users.find_one({"username": session['username']})
         if user:
-            return render_template('profile.html', name=user['name'], username=user['username'])
+            return render_template('profile.html', name=user['name'], username=user['username'], scan_history=user.get('scan_history', []))
         else:
             return "User not found!", 404
     return render_template('compare.html')

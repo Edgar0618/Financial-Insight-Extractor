@@ -75,6 +75,14 @@
         <p>Username: {{username}}</p>
         <a href="/change_password" class="button">Change Password</a>
         <h3>Scan History</h3>
+        <ul>
+    {% for scan in scan_history %}
+    <li>{{ scan.date }} - {{ scan.filename }}</li>
+    {% endfor %}
+</ul>
+
+
+
     </section>
 </body>
 </html>
