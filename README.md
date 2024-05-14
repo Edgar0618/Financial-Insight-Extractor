@@ -1,4 +1,4 @@
-# COP4521-Project
+# Financial Insight Extractor
 
 # Project Setup Instructions
 
